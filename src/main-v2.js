@@ -1,5 +1,5 @@
-import { Clock } from './clock.js?v=18';
-import { Basis3D } from './basis3d.js?v=18';
+import { Clock } from './clock.js?v=19';
+import { Basis3D } from './basis3d.js?v=19';
 import { complex, cMul, cAdd, basisRotationMatrix } from './operators-v2.js?v=16';
 
 const clocksContainer = document.getElementById('clocks');
@@ -30,6 +30,37 @@ function matApply(U, v){
   return [a,b];
 }
 
+function spinExpectationVectorFromDefaultBasis(state){
+  // Default basis is +/-y eigenbasis. Convert to z-basis, then compute Bloch expectation.
+  const invSqrt2 = 1 / Math.sqrt(2);
+  const a = state[0];
+  const b = state[1];
+
+  const alpha = {
+    re: (a.re + b.re) * invSqrt2,
+    im: (a.im + b.im) * invSqrt2,
+  };
+  const beta = {
+    re: (-a.im + b.im) * invSqrt2,
+    im: (a.re - b.re) * invSqrt2,
+  };
+
+  const alphaConjBeta = {
+    re: alpha.re * beta.re + alpha.im * beta.im,
+    im: alpha.re * beta.im - alpha.im * beta.re,
+  };
+
+  const sx = 2 * alphaConjBeta.re;
+  const sy = 2 * alphaConjBeta.im;
+  const sz = (alpha.re * alpha.re + alpha.im * alpha.im) - (beta.re * beta.re + beta.im * beta.im);
+  return { x: sx, y: sy, z: sz };
+}
+
+function syncExpectationVisualization(){
+  const v = spinExpectationVectorFromDefaultBasis(spinor);
+  basisView.setExpectationVector(v.x, v.y, v.z);
+}
+
 function updateClocks(){
   bases.forEach(b => {
     const U = basisRotationMatrix(b.theta, b.phi);
@@ -40,6 +71,7 @@ function updateClocks(){
   });
   basisView.setBases(bases);
   syncFieldVisualization();
+  syncExpectationVisualization();
 }
 
 function normalizeSpinor(){
@@ -293,8 +325,13 @@ document.getElementById('bPhi').addEventListener('input', (event)=>{
 
 addBasis(0,0,'Default');
 syncFieldVisualization();
+syncExpectationVisualization();
 window.__spinorDebug = {
   getSpinor: () => spinor.map((z) => ({ re: z.re, im: z.im })),
+  getExpectation: () => {
+    const v = spinExpectationVectorFromDefaultBasis(spinor);
+    return { x: v.x, y: v.y, z: v.z };
+  },
   getFieldValues: () => ({
     bMag: document.getElementById('bMag').value,
     bTheta: document.getElementById('bTheta').value,

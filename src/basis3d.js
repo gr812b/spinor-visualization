@@ -25,6 +25,7 @@ export class Basis3D {
     this.arrows = [];
     this.fieldArrow = null;
     this.fieldGroup = null;
+    this.expectationGroup = null;
 
     this.renderer.domElement.style.cursor = 'grab';
     this._dragging = false;
@@ -223,6 +224,86 @@ export class Basis3D {
     this.fieldRingTop.position.y = 0.45;
     this.fieldRingBottom.position.y = -0.45;
     this.fieldPulse.position.y = Math.sin(Date.now() * 0.004) * 0.33;
+  }
+
+  setExpectationVector(x, y, z){
+    const vec = new THREE.Vector3(x, y, z);
+    const mag = vec.length();
+    if (mag < 1e-6) {
+      if (this.expectationGroup) this.expectationGroup.visible = false;
+      return;
+    }
+
+    const direction = vec.clone().normalize();
+    const length = Math.min(2.0, Math.max(0.35, 1.7 * mag));
+
+    if (!this.expectationGroup) {
+      this.expectationGroup = new THREE.Group();
+
+      const outerShaft = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.06, 1, 18),
+        new THREE.MeshPhongMaterial({
+          color: 0xec4899,
+          transparent: true,
+          opacity: 0.85,
+          emissive: new THREE.Color(0xbe185d),
+          emissiveIntensity: 0.45,
+        })
+      );
+      outerShaft.position.y = 0.5;
+      this.expectationGroup.add(outerShaft);
+      this.expectationOuterShaft = outerShaft;
+
+      const innerCore = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, 1.04, 14),
+        new THREE.MeshPhongMaterial({
+          color: 0xfdf2f8,
+          transparent: true,
+          opacity: 0.95,
+          emissive: new THREE.Color(0xfbcfe8),
+          emissiveIntensity: 0.8,
+        })
+      );
+      innerCore.position.y = 0.52;
+      this.expectationGroup.add(innerCore);
+      this.expectationCore = innerCore;
+
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(0.13, 0.24, 24),
+        new THREE.MeshPhongMaterial({
+          color: 0xf472b6,
+          transparent: true,
+          opacity: 0.95,
+          emissive: new THREE.Color(0xdb2777),
+          emissiveIntensity: 0.7,
+        })
+      );
+      tip.position.y = 1.12;
+      this.expectationGroup.add(tip);
+      this.expectationTip = tip;
+
+      const halo = new THREE.Mesh(
+        new THREE.TorusGeometry(0.11, 0.02, 10, 28),
+        new THREE.MeshPhongMaterial({
+          color: 0xfbcfe8,
+          transparent: true,
+          opacity: 0.85,
+          emissive: new THREE.Color(0xf9a8d4),
+          emissiveIntensity: 0.9,
+        })
+      );
+      halo.rotation.x = Math.PI / 2;
+      halo.position.y = 1.0;
+      this.expectationGroup.add(halo);
+      this.expectationHalo = halo;
+
+      this.scene.add(this.expectationGroup);
+    }
+
+    this.expectationGroup.visible = true;
+    this.expectationGroup.scale.set(1, length, 1);
+    this.expectationGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction);
+    this.expectationHalo.rotation.y += 0.03;
   }
 
   _basisDirection(thetaDeg, phiDeg){
