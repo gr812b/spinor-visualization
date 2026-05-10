@@ -26,14 +26,25 @@ export class Basis3D {
     this.fieldArrow = null;
     this.fieldGroup = null;
     this.expectationGroup = null;
+    this.expectationSphere = null;
+    this.expectationSphereRadius = 1.0;
+    this.currentFieldDirection = new THREE.Vector3(0, 1, 0);
+    this.currentExpectationVector = new THREE.Vector3(0, 0, 0);
+    this.precessionCircle = null;
+    // Tip local peak is cone center (1.12) + half cone height (0.12)
+    this.expectationTipLocalPeak = 1.24;
 
     this.renderer.domElement.style.cursor = 'grab';
     this._dragging = false;
     this._lastPointer = { x: 0, y: 0 };
     this._bindPointerControls();
+    this._initExpectationSphere();
 
     this._tick = this._tick.bind(this);
     requestAnimationFrame(this._tick);
+
+    // Debug access for diagnostics from console/playwright.
+    window.__basis3D = this;
   }
 
   _bindPointerControls(){
@@ -150,6 +161,7 @@ export class Basis3D {
 
   setFieldDirection(thetaDeg, phiDeg, magnitude = 1){
     const direction = this._basisDirection(thetaDeg, phiDeg);
+    this.currentFieldDirection = direction.clone();
     if (magnitude <= 0) {
       if (this.fieldGroup) this.fieldGroup.visible = false;
       return;
@@ -224,10 +236,12 @@ export class Basis3D {
     this.fieldRingTop.position.y = 0.45;
     this.fieldRingBottom.position.y = -0.45;
     this.fieldPulse.position.y = Math.sin(Date.now() * 0.004) * 0.33;
+    this._recalculatePrecessionCircle();
   }
 
   setExpectationVector(x, y, z){
     const vec = new THREE.Vector3(x, y, z);
+    this.currentExpectationVector = vec.clone();
     const mag = vec.length();
     if (mag < 1e-6) {
       if (this.expectationGroup) this.expectationGroup.visible = false;
@@ -235,7 +249,8 @@ export class Basis3D {
     }
 
     const direction = vec.clone().normalize();
-    const length = Math.min(2.0, Math.max(0.35, 1.7 * mag));
+    // Physical scaling: rendered tip radius should equal |S| (Bloch sphere radius = 1).
+    const length = mag / this.expectationTipLocalPeak;
 
     if (!this.expectationGroup) {
       this.expectationGroup = new THREE.Group();
@@ -304,15 +319,94 @@ export class Basis3D {
     this.expectationGroup.scale.set(1, length, 1);
     this.expectationGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction);
     this.expectationHalo.rotation.y += 0.03;
+    this._recalculatePrecessionCircle();
+  }
+
+  setExpectationSphereVisible(visible){
+    if (this.expectationSphere) this.expectationSphere.visible = !!visible;
+  }
+
+  _initExpectationSphere(){
+    if (this.expectationSphere) return;
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(this.expectationSphereRadius, 40, 28),
+      new THREE.MeshPhongMaterial({
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.18,
+        emissive: new THREE.Color(0x60a5fa),
+        emissiveIntensity: 0.15,
+        side: THREE.DoubleSide,
+      })
+    );
+    sphere.material.depthWrite = false;
+    sphere.renderOrder = -1;
+
+    const wire = new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.SphereGeometry(this.expectationSphereRadius, 26, 18)),
+      new THREE.LineBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.35 })
+    );
+    wire.material.depthWrite = false;
+    wire.renderOrder = -1;
+    sphere.add(wire);
+
+    this.scene.add(sphere);
+    this.expectationSphere = sphere;
+  }
+
+  _recalculatePrecessionCircle(){
+    const axis = this.currentFieldDirection.clone().normalize();
+    const s = this.currentExpectationVector.clone();
+    if (s.length() < 1e-6 || axis.length() < 1e-6) {
+      if (this.precessionCircle) this.precessionCircle.visible = false;
+      return;
+    }
+
+    const center = axis.clone().multiplyScalar(s.dot(axis));
+    const perp = s.clone().sub(center);
+    const radius = perp.length();
+    if (radius < 1e-6) {
+      if (this.precessionCircle) this.precessionCircle.visible = false;
+      return;
+    }
+
+    const u = perp.clone().normalize();
+    const v = new THREE.Vector3().crossVectors(axis, u).normalize();
+    const segments = 128;
+    const points = [];
+    for (let i = 0; i <= segments; i++) {
+      const a = (i / segments) * Math.PI * 2;
+      points.push(
+        center.clone()
+          .add(u.clone().multiplyScalar(Math.cos(a) * radius))
+          .add(v.clone().multiplyScalar(Math.sin(a) * radius))
+      );
+    }
+
+    if (!this.precessionCircle) {
+      const geom = new THREE.BufferGeometry().setFromPoints(points);
+      const mat = new THREE.LineBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.55 });
+      this.precessionCircle = new THREE.Line(geom, mat);
+      this.scene.add(this.precessionCircle);
+    } else {
+      this.precessionCircle.geometry.dispose();
+      this.precessionCircle.geometry = new THREE.BufferGeometry().setFromPoints(points);
+      this.precessionCircle.visible = true;
+    }
   }
 
   _basisDirection(thetaDeg, phiDeg){
-    const th = thetaDeg * Math.PI/180; const ph = phiDeg * Math.PI/180;
-    // Use y as the polar axis so theta=0 points straight up.
+    const th = thetaDeg * Math.PI/180;
+    const ph = phiDeg * Math.PI/180;
+    // Angles are defined in the simulation's default-basis frame.
+    // Map default-frame axes -> lab-frame axes as:
+    // x_default -> z_lab, y_default -> x_lab, z_default -> y_lab.
+    // With n_default = (sin th cos ph, sin th sin ph, cos th), this yields:
+    // n_lab = (sin th sin ph, cos th, sin th cos ph).
     return new THREE.Vector3(
-      Math.sin(th) * Math.cos(ph),
+      Math.sin(th) * Math.sin(ph),
       Math.cos(th),
-      Math.sin(th) * Math.sin(ph)
+      -Math.sin(th) * Math.cos(ph)
     ).normalize();
   }
 
