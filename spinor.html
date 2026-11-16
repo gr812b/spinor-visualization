@@ -31,10 +31,20 @@
       </section>
       <section id="visuals"><div id="clocks"></div><div id="three"></div></section>
     </main>
-    <p class="note" style="margin-top:20px">This demo uses the same shared complex arithmetic as the <a href="complex-multiplication.html">complex multiplication</a> lesson.</p>
+    <section class="panel" style="margin-top:20px;max-width:950px">
+      <h2>Equations used here</h2>
+      <p class="note">The spinor components use the same complex multiplication and conjugation functions as the geometric demo. More spin-specific identities can be documented here as this library grows.</p>
+      <div class="equation-list" id="spinor-equations"></div>
+      <p class="note" style="margin-top:12px"><a href="equations.html">Browse all equations</a></p>
+    </section>
   </div>
   <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
   <script type="module" src="src/ui/navigation.js"></script>
   <script type="module" src="src/main-v2.js?v=19"></script>
+  <script type="module">
+    import { DEMOS } from './src/math/equations.js';
+    import { mountEquationLibrary } from './src/ui/equation-library.js';
+    mountEquationLibrary(document.getElementById('spinor-equations'), DEMOS.find(d => d.id === 'spinor').equationIds);
+  </script>
 </body>
 </html>
