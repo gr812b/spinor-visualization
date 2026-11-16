@@ -6,18 +6,18 @@ export class Basis3D {
     this.w = container.clientWidth || 400;
     this.h = Math.max(360, container.clientHeight || 360);
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf8f9fc);
+    this.scene.background = new THREE.Color(0x0c1626);
     this.camera = new THREE.PerspectiveCamera(50, this.w/this.h, 0.1, 1000);
     this.camera.position.set(2,2,2);
     this.camera.lookAt(0,0,0);
     this.renderer = new THREE.WebGLRenderer({antialias:true});
     this.renderer.setSize(this.w, this.h);
-    this.renderer.setClearColor(0xf8f9fc, 1);
+    this.renderer.setClearColor(0x0c1626, 1);
     container.appendChild(this.renderer.domElement);
     const light = new THREE.DirectionalLight(0xffffff,1);
     light.position.set(5,5,5); this.scene.add(light);
-    this.scene.add(new THREE.AmbientLight(0x404040));
-    const grid = new THREE.GridHelper(4,8); this.scene.add(grid);
+    this.scene.add(new THREE.AmbientLight(0x72839d,0.8));
+    const grid = new THREE.GridHelper(4,8,0x6c839e,0x34465e); this.scene.add(grid);
     const axes = new THREE.AxesHelper(1.6); this.scene.add(axes);
 
     this.radius = 3.2;
