@@ -3,7 +3,7 @@ import { parseScalar } from '../math/parse-scalar.js';
 import {
   interpolateMatrix2, determinant2, isComplexMatrix2, complexFromMatrix2,
   isSymmetricMatrix2, realEigenstructure2, imageOfUnitCircle,
-  svgLinearMatrix2,
+  svgLinearMatrix2, unitCirclePoint,
 } from '../math/matrix2.js';
 import {
   worldToScreen, screenToWorld, zoomViewport, fitViewport, niceGridStep,
@@ -145,7 +145,7 @@ function renderVectors(current){
   const group=$('plot-vectors');
   group.replaceChildren();
   const angle=Number($('vector-angle').value)*Math.PI/180;
-  const input=[Math.cos(angle),Math.sin(angle)];
+  const input=unitCirclePoint(angle);
   const output=applyMatrix2(current,input);
   const e1=applyMatrix2(current,[1,0]);
   const e2=applyMatrix2(current,[0,1]);
@@ -304,7 +304,7 @@ svg.addEventListener('pointerdown',event=>{
   const position=pointerPosition(event);
   const r=screenToWorld(view,position,W,H);
   const angle=Number($('vector-angle').value)*Math.PI/180;
-  const handle=xy([Math.cos(angle),Math.sin(angle)]);
+  const handle=xy(unitCirclePoint(angle));
   const onHandle=Math.hypot(position[0]-handle[0],position[1]-handle[1])<23;
   const onCircle=Math.abs(Math.hypot(...r)-1)*view.pixels<12;
   state.pointerMode=onHandle||onCircle?'vector':'pan';
