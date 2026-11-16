@@ -35,7 +35,7 @@ export function mountEquationLibrary(container, ids = Object.keys(EQUATIONS), ex
     symbols.textContent = e.symbols;
     const implementation = document.createElement('code');
     implementation.className = 'eq-implementation';
-    implementation.textContent = e.implementation;
+    implementation.textContent = 'Implementation: ' + e.functions.map(fn => fn.name + '()').join(', ') + ' · ' + e.source;
     details.append(why, picture, symbols, implementation);
     container.append(details);
   }
