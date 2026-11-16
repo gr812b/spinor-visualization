@@ -219,7 +219,7 @@ for(const button of document.querySelectorAll('[data-example]')){
 }
 function zoomAt(factor,x=W/2,y=H/2) {
   const previous=view.pixels;
-  view.pixels=Math.max(4,Math.min(400,previous*factor));
+  view.pixels=Math.max(0.00001,Math.min(100000,previous*factor));
   const ratio=view.pixels/previous;
   view.panX=x-W/2-(x-W/2-view.panX)*ratio;
   view.panY=y-H/2-(y-H/2-view.panY)*ratio;
@@ -240,7 +240,7 @@ $('fit-view').addEventListener('click',()=>{
   ];
   const minX=Math.min(...points.map(p=>p[0])),maxX=Math.max(...points.map(p=>p[0]));
   const minY=Math.min(...points.map(p=>p[1])),maxY=Math.max(...points.map(p=>p[1]));
-  view.pixels=Math.max(4,Math.min(250,Math.min((W-120)/Math.max(2,maxX-minX),(H-105)/Math.max(2,maxY-minY))));
+  view.pixels=Math.max(0.00001,Math.min(100000,Math.min((W-120)/Math.max(0.01,maxX-minX),(H-105)/Math.max(0.01,maxY-minY))));
   view.panX=-(minX+maxX)*view.pixels/2;
   view.panY=(minY+maxY)*view.pixels/2;
   render();
