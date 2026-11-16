@@ -1,3 +1,4 @@
+import { fieldDirection, precessionGeometry } from './math/spinor.js';
 // Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {
   constructor(container) {
@@ -5,18 +6,18 @@ export class Basis3D {
     this.w = container.clientWidth || 400;
     this.h = Math.max(360, container.clientHeight || 360);
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf8f9fc);
+    this.scene.background = new THREE.Color(0x0c1626);
     this.camera = new THREE.PerspectiveCamera(50, this.w/this.h, 0.1, 1000);
     this.camera.position.set(2,2,2);
     this.camera.lookAt(0,0,0);
     this.renderer = new THREE.WebGLRenderer({antialias:true});
     this.renderer.setSize(this.w, this.h);
-    this.renderer.setClearColor(0xf8f9fc, 1);
+    this.renderer.setClearColor(0x0c1626, 1);
     container.appendChild(this.renderer.domElement);
     const light = new THREE.DirectionalLight(0xffffff,1);
     light.position.set(5,5,5); this.scene.add(light);
-    this.scene.add(new THREE.AmbientLight(0x404040));
-    const grid = new THREE.GridHelper(4,8); this.scene.add(grid);
+    this.scene.add(new THREE.AmbientLight(0x72839d,0.8));
+    const grid = new THREE.GridHelper(4,8,0x6c839e,0x34465e); this.scene.add(grid);
     const axes = new THREE.AxesHelper(1.6); this.scene.add(axes);
 
     this.radius = 3.2;
@@ -362,11 +363,14 @@ export class Basis3D {
       return;
     }
 
-    const center = axis.clone().multiplyScalar(s.dot(axis));
-    const perp = s.clone().sub(center);
-    const radius = perp.length();
-    if (radius < 1e-6) {
-      if (this.precessionCircle) this.precessionCircle.visible = false;
+    const geometry=precessionGeometry(
+      {x:s.x,y:s.y,z:s.z},{x:axis.x,y:axis.y,z:axis.z}
+    );
+    const center=new THREE.Vector3(geometry.center.x,geometry.center.y,geometry.center.z);
+    const perp=new THREE.Vector3(geometry.perpendicular.x,geometry.perpendicular.y,geometry.perpendicular.z);
+    const radius=geometry.radius;
+    if(radius < 1e-6) {
+      if(this.precessionCircle) this.precessionCircle.visible=false;
       return;
     }
 
@@ -395,19 +399,9 @@ export class Basis3D {
     }
   }
 
-  _basisDirection(thetaDeg, phiDeg){
-    const th = thetaDeg * Math.PI/180;
-    const ph = phiDeg * Math.PI/180;
-    // Angles are defined in the simulation's default-basis frame.
-    // Map default-frame axes -> lab-frame axes as:
-    // x_default -> z_lab, y_default -> x_lab, z_default -> y_lab.
-    // With n_default = (sin th cos ph, sin th sin ph, cos th), this yields:
-    // n_lab = (sin th sin ph, cos th, sin th cos ph).
-    return new THREE.Vector3(
-      Math.sin(th) * Math.sin(ph),
-      Math.cos(th),
-      -Math.sin(th) * Math.cos(ph)
-    ).normalize();
+  _basisDirection(thetaDeg,phiDeg){
+    const direction=fieldDirection(thetaDeg,phiDeg);
+    return new THREE.Vector3(direction.x,direction.y,direction.z).normalize();
   }
 
   _clearArrows(){

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Complex multiplication · Math, seen</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <main class="site-content compact-workbench">
+    <header class="compact-header">
+      <h1>Complex multiplication</h1>
+      <p>One complex number moves the entire plane: rotation + uniform scaling.</p>
+    </header>
+    <div class="demo-layout">
+      <section class="panel grid-panel">
+        <div class="plot-toolbar">
+          <strong>Cartesian grid</strong>
+          <div class="plot-actions" role="group" aria-label="Graph viewport">
+            <button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+            <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+            <button id="fit-view" title="Fit input and output to the view">Fit</button>
+            <button id="reset-view" title="Restore default view">Reset view</button>
+          </div>
+        </div>
+        <svg id="grid-svg" viewBox="0 0 760 510" tabindex="0" role="img"
+             aria-label="Zoomable and pannable plane, with original grid, transformed grid, and complex arrows. Drag to pan and scroll to zoom.">
+          <defs>
+            <clipPath id="grid-window"><rect x="0" y="0" width="760" height="510"></rect></clipPath>
+            <marker id="arrow-orange" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#ffbf6e"></path></marker>
+            <marker id="arrow-violet" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#b6a0ff"></path></marker>
+            <marker id="arrow-teal" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#55ddcb"></path></marker>
+          </defs>
+          <g id="reference-grid" clip-path="url(#grid-window)"></g>
+          <g id="moving-grid" clip-path="url(#grid-window)"></g>
+          <g id="grid-vectors" clip-path="url(#grid-window)"></g>
+        </svg>
+        <div class="plot-legend">
+          <span style="--line:#3c506c">original grid</span>
+          <span style="--line:#55ddcb">transformed grid</span>
+          <span style="--line:#b6a0ff">multiplier: image of 1</span>
+          <span style="--line:#ffbf6e">sample point</span>
+        </div>
+        <div class="compact-playbar">
+          <button id="play" class="primary">▶ Play</button>
+          <button id="reset">↺</button>
+          <input id="progress" type="range" min="0" max="1" step="0.001" value="0" aria-label="Transformation progress">
+          <output id="progress-label" for="progress">0%</output>
+        </div>
+        <div class="view-hint">Drag to pan · wheel or ± to zoom · <span id="view-label">54 px/unit</span></div>
+      </section>
+      <div class="demo-side compact-sidebar">
+        <section class="panel">
+          <div class="section-title"><h2>Multiplier</h2><output id="multiplier-summary">2 + i</output></div>
+          <div class="controls-grid">
+            <label class="field-label">Real part a <input id="a" type="text" inputmode="text" value="2" spellcheck="false" aria-label="Multiplier real part"></label>
+            <label class="field-label">Imaginary part b <input id="b" type="text" inputmode="text" value="1" spellcheck="false" aria-label="Multiplier imaginary part"></label>
+          </div>
+          <div class="presets" aria-label="Multiplication presets">
+            <button class="preset" data-example="1,0">1</button>
+            <button class="preset" data-example="0,1">90°</button>
+            <button class="preset" data-example="sqrt(2)/2,sqrt(2)/2">45° · ⅛ turn</button>
+            <button class="preset" data-example="sqrt(2)/2,-sqrt(2)/2">−45°</button>
+            <button class="preset" data-example="-1,0">180°</button>
+            <button class="preset" data-example="2,1">2 + i</button>
+            <button class="preset" data-example="0,0">0</button>
+          </div>
+          <p id="input-error" class="validation-message" aria-live="polite"></p>
+          <div class="stats">
+            <div class="stat"><small>Scale |z|</small><strong id="radius"></strong></div>
+            <div class="stat"><small>Rotation arg(z)</small><strong id="angle"></strong></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-title"><h2>Sample point</h2><output id="point-summary"></output></div>
+          <div class="controls-grid">
+            <label class="field-label">Real part u <input id="u" type="text" inputmode="text" value="1" spellcheck="false" aria-label="Point real part"></label>
+            <label class="field-label">Imaginary part v <input id="v" type="text" inputmode="text" value="1/2" spellcheck="false" aria-label="Point imaginary part"></label>
+          </div>
+          <pre class="math-live compact-math" id="current-product"></pre>
+        </section>
+        <section class="panel math-details">
+          <div class="section-title"><h2>One operation, two notations</h2></div>
+          <div class="math-caption">Expanded product</div>
+          <pre class="math-live math-box" id="expanded-product"></pre>
+          <div class="matrix-pair">
+            <div><div class="math-caption">Target matrix</div><pre class="math-live math-box" id="target-matrix"></pre></div>
+            <div><div class="math-caption">Animated matrix</div><pre class="math-live math-box" id="current-matrix"></pre></div>
+          </div>
+          <p id="matrix-check" class="note" style="margin:8px 0 0"></p>
+        </section>
+      </div>
+    </div>
+    <details class="panel reference-panel">
+      <summary><strong>Equations used in this demo</strong><span>Inspect definitions, intuition, and implementation</span></summary>
+      <div class="equation-list" id="equation-inspector"></div>
+      <a class="reference-link" href="equations.html">Full equation library</a>
+    </details>
+  </main>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module" src="src/demos/complex-multiplication.js"></script>
+</body>
+</html>

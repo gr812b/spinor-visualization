@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spinor visualization · Math, seen</title>
+  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <div class="site-content spinor-area">
+    <header>
+      <h1>Spinor visualization</h1>
+    </header>
+    <main>
+      <section id="controls">
+        <div class="control-row">
+          <button id="addBasis">Add Basis</button>
+          <button id="clear">Clear All</button>
+        </div>
+        <div id="basisList"></div>
+        <div class="control-row">
+          <label>Magnetic field magnitude: <input id="bMag" type="range" min="0" max="10" step="0.1" value="1"></label>
+          <label><span id="bThetaLabel">Field θ 90°</span><input id="bTheta" type="range" min="0" max="180" value="90"></label>
+          <label><span id="bPhiLabel">Field φ 0°</span><input id="bPhi" type="range" min="0" max="360" value="0"></label>
+          <button id="togglePlay">Play</button>
+        </div>
+      </section>
+      <section id="visuals"><div id="clocks"></div><div id="three"></div></section>
+    </main>
+    <section class="panel" style="margin-top:20px;max-width:950px">
+      <h2>Equations used here</h2>
+      <p class="note">Basis change, normalization, Pauli expectations, the magnetic-field Hamiltonian, and time evolution are linked to the shared math library.</p>
+      <div class="equation-list" id="spinor-equations"></div>
+      <p class="note" style="margin-top:12px"><a href="equations.html">Browse all equations</a></p>
+    </section>
+  </div>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module" src="src/main-v2.js?v=19"></script>
+  <script type="module">
+    import { DEMOS } from './src/math/equations.js';
+    import { mountEquationLibrary } from './src/ui/equation-library.js';
+    mountEquationLibrary(document.getElementById('spinor-equations'), DEMOS.find(d => d.id === 'spinor').equationIds);
+  </script>
+</body>
+</html>

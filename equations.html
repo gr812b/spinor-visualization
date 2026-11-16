@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Equation library · Math, seen</title><link rel="stylesheet" href="site.css"></head>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <main class="site-content">
+    <header>
+      <h1>Equation library</h1>
+      <p class="intro">What each formula means, what it does, and the implementation behind it.</p>
+    </header>
+    <section class="panel" style="max-width:900px">
+      <div id="all-equations" class="equation-list"></div>
+    </section>
+  </main>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module">
+    import { mountEquationLibrary } from './src/ui/equation-library.js';
+    mountEquationLibrary(document.getElementById('all-equations'));
+  </script>
+</body>
+</html>

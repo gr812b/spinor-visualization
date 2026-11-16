@@ -1,0 +1,22 @@
+name: Mathematical checks
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check browser scripts for syntax errors
+        run: |
+          node --check src/demos/complex-multiplication.js
+          node --check src/ui/equation-library.js
+          node --check src/ui/navigation.js
+          node --check src/main-v2.js
+          node --check src/basis3d.js
+          node --check src/clock.js
+      - name: Run mathematical invariants
+        run: npm test
