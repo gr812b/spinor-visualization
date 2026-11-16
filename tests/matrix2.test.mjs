@@ -63,7 +63,6 @@ test('symmetric matrix eigenvectors describe two exact fixed directions',()=>{
 test('general matrix eigenvectors may be nonorthogonal, repeated, or absent over the reals',()=>{
   const nonSymmetric=realEigenstructure2([[3,1],[0,1]]);
   assert.equal(nonSymmetric.kind,'two');
-  const product=nonSymmetric.directions.reduce((s,e)=>s,0);
   for(const item of nonSymmetric.directions)
     nearVector(applyMatrix2([[3,1],[0,1]],item.vector),
       item.vector.map(v=>v*item.value));
