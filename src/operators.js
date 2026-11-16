@@ -1,3 +1,6 @@
+import { cAdd, cMul } from './math/complex.js';
+export { complex, cAdd, cMul, cScale, cConj, cExp } from './math/complex.js';
+
 // Spinor math utilities
 const toRad = (d) => d * Math.PI/180;
 
@@ -16,14 +19,6 @@ export function basisRotationMatrix(thetaDeg, phiDeg) {
   const betaConjNeg = { re: -beta.re, im: beta.im };
   return [[alphaC, betaConjNeg], [beta, alphaC]];
 }
-
-// Since JS doesn't have complex numbers natively, represent complex as {re,im}
-export function complex(re, im=0) { return {re,im}; }
-export function cAdd(a,b){ return {re: a.re+b.re, im: a.im+b.im}; }
-export function cMul(a,b){ return {re: a.re*b.re - a.im*b.im, im: a.re*b.im + a.im*b.re}; }
-export function cScale(a,s){ return {re: a.re*s, im: a.im*s}; }
-export function cConj(a){ return {re: a.re, im: -a.im}; }
-export function cExp(theta){ return {re: Math.cos(theta), im: Math.sin(theta)}; }
 
 export function applySU2(U, spinor){
   // U is 2x2 with complex entries {re,im}
