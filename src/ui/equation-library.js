@@ -59,7 +59,13 @@ function makeVisual(kind) {
     el('line',{x1:90,y1:70,x2:x,y2:y,stroke:color,'stroke-width':3,'stroke-linecap':'round'});
     el('circle',{cx:x,cy:y,r:4,fill:color});
   };
-  if (kind === 'conjugate') {
+  if (kind === 'spinor') {
+    el('circle',{cx:105,cy:47,r:34,stroke:'#b7c8df','stroke-width':1,fill:'#edf3fa'});
+    el('ellipse',{cx:105,cy:47,rx:34,ry:12,stroke:'#9fb4d1','stroke-width':1,fill:'none'});
+    el('line',{x1:105,y1:47,x2:124,y2:15,stroke:'#c0268b','stroke-width':3});
+    el('circle',{cx:124,cy:15,r:4,fill:'#c0268b'});
+    el('text',{x:154,y:32,fill:'#52647b','font-size':13}).textContent='Bloch vector';
+  } else if (kind === 'conjugate') {
     arrow(151,28,'#2563eb'); arrow(151,82,'#c084fc');
   } else if (kind === 'matrix') {
     arrow(144,49,'#2563eb'); arrow(69,16,'#0d9488');
