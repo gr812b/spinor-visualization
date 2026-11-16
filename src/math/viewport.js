@@ -40,3 +40,14 @@ export function niceGridStep(pixelsPerUnit) {
   return options.reduce((best,n)=>
     Math.abs(Math.log(n/desired))<Math.abs(Math.log(best/desired))?n:best,options[0]);
 }
+
+/** Positions of grid lines in the original, untransformed coordinate system.
+ *  Supply these same positions to every depiction of the lattice.
+ *  Individual transformations may render different visible subsets,
+ *  but may NOT choose a different spacing.
+ */
+export function gridLinePositions(step, halfCount) {
+  if(!Number.isFinite(step) || step <= 0 || !Number.isInteger(halfCount) || halfCount < 0 || halfCount > 1000)
+    throw new RangeError('Invalid lattice spacing or line count');
+  return Array.from({length:2*halfCount+1},(_,i)=>(i-halfCount)*step);
+}
