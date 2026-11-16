@@ -2,7 +2,7 @@ import {
   complex, cMul, cAbs, cArg, complexMatrix, applyMatrix2, interpolateMultiplier,
 } from '../math/complex.js';
 import { parseScalar } from '../math/parse-scalar.js';
-import { worldToScreen, zoomViewport, fitViewport, niceGridStep } from '../math/viewport.js';
+import { worldToScreen, zoomViewport, fitViewport, niceGridStep, gridLinePositions } from '../math/viewport.js';
 import { DEMOS } from '../math/equations.js';
 import { mountEquationLibrary } from '../ui/equation-library.js';
 
@@ -97,8 +97,7 @@ function drawGrid(matrix,group,color,opacity,width,step) {
   const extent=Math.min(1e12,reach/Math.max(pixelsPerUnit,1e-10));
   const count=Math.min(80,Math.ceil(extent/step));
   const span=step*(count+3);
-  for(let k=-count;k<=count;k++){
-    const v=k*step;
+  for(const v of gridLinePositions(step,count)){
     line(group,applyMatrix2(matrix,[v,-span]),applyMatrix2(matrix,[v,span]),color,width,opacity);
     line(group,applyMatrix2(matrix,[-span,v]),applyMatrix2(matrix,[span,v]),color,width,opacity);
   }
