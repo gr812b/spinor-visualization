@@ -154,3 +154,15 @@ button.preset { padding: 6px 10px; font-size: 12px; }
   .plot-actions { gap:3px; }
   .compact-workbench .plot-actions button { padding:3px 6px; }
 }
+
+/* The matrix's two columns are exactly the violet T(1) and teal T(i) arrows. */
+.matrix-first-column { color:#7c3aed; font-weight:760; }
+.matrix-second-column { color:#0d9488; font-weight:760; }
+body.site-layout { grid-template-columns:205px minmax(0,1fr); }
+.app-sidebar { padding:16px 11px; }
+.app-navigation .brand { padding-bottom:12px; }
+@media(max-width:740px) {
+  body.site-layout { display:block; }
+  .app-sidebar { padding:9px 12px; }
+  .app-navigation .brand { padding-bottom:4px; }
+}
