@@ -2,6 +2,7 @@ import {
   complex, cMul, cAbs, cArg, complexMatrix, applyMatrix2, interpolateMultiplier,
 } from '../math/complex.js';
 import { parseScalar } from '../math/parse-scalar.js';
+import { worldToScreen, zoomViewport, fitViewport, niceGridStep } from '../math/viewport.js';
 import { DEMOS } from '../math/equations.js';
 import { mountEquationLibrary } from '../ui/equation-library.js';
 
@@ -55,8 +56,9 @@ function svgNode(parent,name,attrs,label) {
   return node;
 }
 function xy(point) {
-  return [W/2 + view.panX + point[0]*view.pixels, H/2 + view.panY - point[1]*view.pixels];
+  return worldToScreen(view,point,W,H);
 }
+
 function line(group,from,to,color,width,opacity=1,dash='') {
   const a=xy(from),b=xy(to);
   const attrs={x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:color,'stroke-width':width,'stroke-opacity':opacity};
@@ -84,18 +86,11 @@ function label(group,point,text,color,dx=8,dy=-10) {
     'paint-order':'stroke',stroke:'#f8fbff','stroke-width':3.5,
   },text);
 }
-function niceStep(pixelsPerUnit) {
-  const desired = 67/Math.max(1e-10,pixelsPerUnit);
-  const power = Math.pow(10,Math.floor(Math.log10(desired)));
-  const options = [1,2,5,10].map(n=>n*power);
-  return options.reduce((best,n)=>
-    Math.abs(Math.log(n/desired)) < Math.abs(Math.log(best/desired)) ? n : best,options[0]);
-}
 function drawGrid(matrix,group,color,opacity,width) {
   const mag=Math.hypot(matrix[0][0],matrix[1][0]);
   if(mag<1e-9) return;
   const pixelsPerUnit=view.pixels*mag;
-  const step=niceStep(pixelsPerUnit);
+  const step=niceGridStep(pixelsPerUnit);
   const offset=Math.hypot(W/2+view.panX,H/2+view.panY);
   const reach=Math.max(offset,Math.hypot(W/2-view.panX,H/2-view.panY))+W;
   const extent=Math.min(1e12,reach/Math.max(pixelsPerUnit,1e-10));
@@ -148,7 +143,7 @@ function render() {
   const e=Math.max(50,(W+H+Math.abs(view.panX)+Math.abs(view.panY))/view.pixels);
   line(reference,[-e,0],[e,0],'#69788d',1.5,.65);
   line(reference,[0,-e],[0,e],'#69788d',1.5,.65);
-  const tickStep=niceStep(view.pixels);
+  const tickStep=niceGridStep(view.pixels);
   const nTicks=Math.min(26,Math.ceil(e/tickStep));
   for(let k=-nTicks;k<=nTicks;k++) {
     if(k===0)continue;
@@ -218,13 +213,10 @@ for(const button of document.querySelectorAll('[data-example]')){
   });
 }
 function zoomAt(factor,x=W/2,y=H/2) {
-  const previous=view.pixels;
-  view.pixels=Math.max(0.00001,Math.min(100000,previous*factor));
-  const ratio=view.pixels/previous;
-  view.panX=x-W/2-(x-W/2-view.panX)*ratio;
-  view.panY=y-H/2-(y-H/2-view.panY)*ratio;
+  Object.assign(view,zoomViewport(view,factor,x,y,W,H));
   render();
 }
+
 $('zoom-in').addEventListener('click',()=>zoomAt(1.3));
 $('zoom-out').addEventListener('click',()=>zoomAt(1/1.3));
 $('reset-view').addEventListener('click',()=>{
@@ -238,11 +230,7 @@ $('fit-view').addEventListener('click',()=>{
     applyMatrix2(m,[data.u,data.v]),
     applyMatrix2(m,[1,0]),applyMatrix2(m,[0,1]),
   ];
-  const minX=Math.min(...points.map(p=>p[0])),maxX=Math.max(...points.map(p=>p[0]));
-  const minY=Math.min(...points.map(p=>p[1])),maxY=Math.max(...points.map(p=>p[1]));
-  view.pixels=Math.max(0.00001,Math.min(100000,Math.min((W-120)/Math.max(0.01,maxX-minX),(H-105)/Math.max(0.01,maxY-minY))));
-  view.panX=-(minX+maxX)*view.pixels/2;
-  view.panY=(minY+maxY)*view.pixels/2;
+  Object.assign(view,fitViewport(points,W,H));
   render();
 });
 function toSvgPosition(event){
