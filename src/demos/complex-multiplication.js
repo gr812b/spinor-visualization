@@ -83,7 +83,7 @@ function label(group,point,text,color,dx=8,dy=-10) {
   if(x<10 || x>W-40 || y<15 || y>H-12) return;
   svgNode(group,'text',{
     x:x+dx,y:y+dy,fill:color,'font-size':12,'font-weight':650,
-    'paint-order':'stroke',stroke:'#f8fbff','stroke-width':3.5,
+    'paint-order':'stroke',stroke:'#0c1626','stroke-width':3.5,
   },text);
 }
 function drawGrid(matrix,group,color,opacity,width) {
@@ -139,34 +139,34 @@ function render() {
   const matrixPoint=applyMatrix2(currentMatrix,[u,v]);
 
   reference.replaceChildren();moving.replaceChildren();vectors.replaceChildren();
-  drawGrid([[1,0],[0,1]],reference,'#b4c4d9',.55,1.05);
+  drawGrid([[1,0],[0,1]],reference,'#3c506c',.55,1.05);
   const e=Math.max(50,(W+H+Math.abs(view.panX)+Math.abs(view.panY))/view.pixels);
-  line(reference,[-e,0],[e,0],'#69788d',1.5,.65);
-  line(reference,[0,-e],[0,e],'#69788d',1.5,.65);
+  line(reference,[-e,0],[e,0],'#9eafc7',1.5,.65);
+  line(reference,[0,-e],[0,e],'#9eafc7',1.5,.65);
   const tickStep=niceGridStep(view.pixels);
   const nTicks=Math.min(26,Math.ceil(e/tickStep));
   for(let k=-nTicks;k<=nTicks;k++) {
     if(k===0)continue;
     const px=xy([k*tickStep,0]), py=xy([0,k*tickStep]);
     if(px[0]>12 && px[0]<W-18 && px[1]>12 && px[1]<H-12){
-      svgNode(reference,'text',{x:px[0]+3,y:px[1]+13,fill:'#718096','font-size':10},fmt(k*tickStep));
+      svgNode(reference,'text',{x:px[0]+3,y:px[1]+13,fill:'#9eb1c8','font-size':10},fmt(k*tickStep));
     }
     if(py[0]>12 && py[0]<W-35 && py[1]>12 && py[1]<H-12){
-      svgNode(reference,'text',{x:py[0]+5,y:py[1]-4,fill:'#718096','font-size':10},fmt(k*tickStep));
+      svgNode(reference,'text',{x:py[0]+5,y:py[1]-4,fill:'#9eb1c8','font-size':10},fmt(k*tickStep));
     }
   }
-  drawGrid(currentMatrix,moving,'#0d9488',.72,1.3);
+  drawGrid(currentMatrix,moving,'#55ddcb',.72,1.3);
   const currentOne=applyMatrix2(currentMatrix,[1,0]);
   const currentI=applyMatrix2(currentMatrix,[0,1]);
   const one=[currentOne[0],currentOne[1]], imaginary=[currentI[0],currentI[1]];
-  arrow(vectors,[0,0],one,'#7c3aed','arrow-violet');
-  arrow(vectors,[0,0],imaginary,'#0d9488','arrow-teal');
-  arrow(vectors,[0,0],[u,v],'#bd7514',null,.38,'4 5');
-  arrow(vectors,[0,0],[output.re,output.im],'#bd7514','arrow-orange');
-  label(vectors,one,'T(1) = w(t)','#7c3aed');
-  label(vectors,imaginary,'T(i)','#0d9488');
-  label(vectors,[output.re,output.im],'T(point)','#a86a0a');
-  label(vectors,[0,0],'0','#475569',7,14);
+  arrow(vectors,[0,0],one,'#b6a0ff','arrow-violet');
+  arrow(vectors,[0,0],imaginary,'#55ddcb','arrow-teal');
+  arrow(vectors,[0,0],[u,v],'#ffbf6e',null,.38,'4 5');
+  arrow(vectors,[0,0],[output.re,output.im],'#ffbf6e','arrow-orange');
+  label(vectors,one,'T(1) = w(t)','#b6a0ff');
+  label(vectors,imaginary,'T(i)','#55ddcb');
+  label(vectors,[output.re,output.im],'T(point)','#ffbf6e');
+  label(vectors,[0,0],'0','#b5c5d9',7,14);
 
   progressSlider.value=String(state.progress);
   $('progress-label').textContent=Math.round(state.progress*100)+'%';
