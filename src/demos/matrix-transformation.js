@@ -8,7 +8,7 @@ import {
 import {
   worldToScreen, screenToWorld, zoomViewport, fitViewport, niceGridStep,
 } from '../math/viewport.js';
-import { renderMatrix2, formatReal as fmt } from '../ui/matrix-display.js';
+import { renderMatrix2, renderVector2, formatReal as fmt } from '../ui/matrix-display.js';
 import { DEMOS } from '../math/equations.js';
 import { mountEquationLibrary } from '../ui/equation-library.js';
 
@@ -161,9 +161,8 @@ function renderVectors(current){
   textAt(group,e2,'M(t)e₂','#55ddcb');
   textAt(group,output,'M(t)v','#ffbf6e',8,15);
   $('angle-label').textContent=Math.round(Number($('vector-angle').value))+'°';
-  $('vector-readout').textContent=
-    'v = ('+fmt(input[0])+', '+fmt(input[1])+')  →  M(t)v = ('+
-    fmt(output[0])+', '+fmt(output[1])+')';
+  renderVector2($('vector-input'),input);
+  renderVector2($('vector-output'),output);
 }
 function describeEigenstructure(target) {
   const eigen=realEigenstructure2(target);
