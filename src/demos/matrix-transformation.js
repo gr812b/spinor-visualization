@@ -1,7 +1,7 @@
 import { complexMatrix, applyMatrix2, cAbs, cArg } from '../math/complex.js';
 import { parseScalar } from '../math/parse-scalar.js';
 import {
-  interpolateMatrix2, determinant2, isComplexMatrix2, complexFromMatrix2,
+  interpolateMatrix2, determinant2, complexFromMatrix2,
   isSymmetricMatrix2, realEigenstructure2, imageOfUnitCircle,
   svgLinearMatrix2, unitCirclePoint,
 } from '../math/matrix2.js';
@@ -23,8 +23,6 @@ const state={
 };
 const generalIds=['m11','m12','m21','m22'];
 const complexIds=['zr','zi'];
-const identity=[[1,0],[0,1]];
-const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 
 function svgNode(parent,tag,attrs,text) {
   const node=document.createElementNS(NS,tag);
@@ -199,17 +197,30 @@ function renderFacts(target) {
   $('geometry-summary').textContent=insight+
     ' Animation: M(t) = (1−t)I + tM.';
 }
+let lastGridKey='',lastEigenKey='',lastFactsKey='';
 function render(){
   const target=readTarget();
   if(!target){stop();return;}
   const current=interpolateMatrix2(target,state.progress);
-  drawReferenceGrid();
-  renderEigenlines(target);
+  const viewKey=[view.pixels,view.panX,view.panY].join('|');
+  const targetKey=target.flat().join('|');
+  if(viewKey!==lastGridKey){
+    drawReferenceGrid();
+    lastGridKey=viewKey;
+  }
+  const eigenKey=viewKey+'|'+targetKey+'|'+$('show-eigens').checked;
+  if(eigenKey!==lastEigenKey){
+    renderEigenlines(target);
+    lastEigenKey=eigenKey;
+  }
   renderShape(current);
   renderVectors(current);
-  renderMatrix2($('target-matrix'),target);
   renderMatrix2($('current-matrix'),current);
-  renderFacts(target);
+  if(targetKey!==lastFactsKey){
+    renderMatrix2($('target-matrix'),target);
+    renderFacts(target);
+    lastFactsKey=targetKey;
+  }
   $('progress').value=String(state.progress);
   $('progress-label').textContent=Math.round(state.progress*100)+'%';
   $('view-label').textContent=fmt(view.pixels)+' px/unit';
