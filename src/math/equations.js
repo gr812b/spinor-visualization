@@ -1,6 +1,11 @@
 import { cMul, complexMatrix, applyMatrix2, cAbs, cArg, fromPolar, cConj, cAbs2, interpolateMultiplier } from './complex.js';
 import { basisRotationMatrix } from '../operators-v2.js';
 import {
+  unitCirclePoint, interpolateMatrix2, realEigenstructure2,
+  singularValues2, imageOfUnitCircle, determinant2, isComplexMatrix2,
+  complexFromMatrix2,
+} from './matrix2.js';
+import {
   matDag, matApply, spinorNorm2, normalizeSpinor, expectation, defaultToZBasis,
   spinExpectationVectorFromDefaultBasis, magneticFieldHamiltonian,
   magneticEvolutionOperator, evolveInField, fieldDirection, precessionGeometry,
@@ -52,6 +57,70 @@ export const EQUATIONS = Object.freeze({
     picture: "The grid turns and uniformly resizes instead of shearing. This is a chosen animation path, not a physical law.",
     symbols: "0 ≤ t ≤ 1; r and θ are the target multiplier's magnitude and argument.",
     functions: [interpolateMultiplier], source: "src/math/complex.js",
+    visual: "polar",
+  },
+
+  "real-matrix-action": {
+    title: "General real 2×2 matrix",
+    expression: "[[a, b], [c, d]] [x, y]ᵀ = [ax + by, cx + dy]ᵀ",
+    why: "Each output coordinate is a linear combination of the input coordinates. The matrix columns show where the basis vectors go.",
+    picture: "Apply the same operation to every point on the unit circle to see the full shape.",
+    symbols: "a, b, c, d are independent real numbers; vectors are column vectors.",
+    functions: [applyMatrix2], source: "src/math/complex.js",
+    visual: "matrix",
+  },
+  "unit-circle-image": {
+    title: "Unit circle under a matrix",
+    expression: "v(θ) = [cos θ, sin θ]ᵀ,    image = { M v(θ) : 0 ≤ θ < 2π }",
+    why: "A linear transformation acts on infinitely many points of the circle. Its entire image is an ellipse, a line segment, or a point.",
+    picture: "The native SVG circle is transformed using the actual 2×2 matrix, so there is no polygon approximation.",
+    symbols: "θ runs continuously around the circle; M acts on both coordinates.",
+    functions: [unitCirclePoint, imageOfUnitCircle], source: "src/math/matrix2.js",
+    visual: "ellipse",
+  },
+  "matrix-path": {
+    title: "Continuous matrix interpolation",
+    expression: "M(t) = (1 − t) I + t M,    0 ≤ t ≤ 1",
+    why: "The interpolation starts at the identity and ends at the chosen matrix. Every intermediate matrix acts on the entire circle.",
+    picture: "The curve deforms continuously, including through flattened shapes when the matrix becomes singular. This animation path is a choice.",
+    symbols: "I is the identity matrix and t is the playback progress.",
+    functions: [interpolateMatrix2], source: "src/math/matrix2.js",
+    visual: "ellipse",
+  },
+  "eigenvector-condition": {
+    title: "Eigenvectors and eigenvalues",
+    expression: "M v = λ v,   v ≠ 0,    det(M − λI) = 0",
+    why: "An eigenvector stays on the same line under the matrix. The eigenvalue tells you the signed scale along that line.",
+    picture: "Look for rays whose transformed arrows remain collinear; some matrices have no real eigendirections.",
+    symbols: "λ is real for a displayed real eigendirection; complex eigenvalues are possible but not shown as real rays.",
+    functions: [realEigenstructure2], source: "src/math/matrix2.js",
+    visual: "eigen",
+  },
+  "singular-values": {
+    title: "Ellipse axes and singular values",
+    expression: "σ₁², σ₂² = eigenvalues of MᵀM",
+    why: "The singular values are the semi-axis lengths of the transformed unit circle, including when those axes are not eigendirections of M.",
+    picture: "A symmetric matrix's eigendirections align with the ellipse axes; a general matrix need not share them.",
+    symbols: "σ₁ ≥ σ₂ ≥ 0; a zero σ₂ means the circle collapsed to a line segment.",
+    functions: [singularValues2, imageOfUnitCircle], source: "src/math/matrix2.js",
+    visual: "ellipse",
+  },
+  "area-determinant": {
+    title: "Determinant and area",
+    expression: "det(M) = ad − bc,    transformed unit-disk area = π|det(M)|",
+    why: "The determinant gives the signed area scaling. A negative determinant reverses orientation; zero collapses area.",
+    picture: "The inside of the circle becomes an ellipse with area π times the absolute determinant.",
+    symbols: "The sign records orientation, not a negative physical area.",
+    functions: [determinant2], source: "src/math/matrix2.js",
+    visual: "ellipse",
+  },
+  "complex-matrix-subset": {
+    title: "When a matrix is multiplication by a complex number",
+    expression: "M = [[a, −b], [b, a]]  ⟺  M(x + iy) = (a + ib)(x + iy)",
+    why: "Complex multiplication is a restricted family of real matrices: it rotates and scales every direction equally, without reflecting.",
+    picture: "These matrices map the unit circle to a circle; reflections can also preserve circles but are not complex multiplication.",
+    symbols: "The diagonal entries must match and the off-diagonals must be opposites.",
+    functions: [isComplexMatrix2, complexFromMatrix2], source: "src/math/matrix2.js",
     visual: "polar",
   },
 
@@ -147,6 +216,14 @@ export const DEMOS = Object.freeze([
     href: "complex-multiplication.html",
     summary: "Type any complex number and watch it rotate and scale the Cartesian grid.",
     equationIds: ["complex-product", "matrix-action", "polar-form", "conjugate", "animation-path"],
+  },
+  {
+    id: "matrix-transformation",
+    title: "Matrix transformations",
+    category: "Linear algebra · Eigenvectors",
+    href: "matrix-transformation.html",
+    summary: "Stretch, shear, rotate, or reflect the entire unit circle. Find eigendirections, see ellipse axes, and compare complex multiplication.",
+    equationIds: ["real-matrix-action","unit-circle-image","matrix-path","eigenvector-condition","singular-values","area-determinant","complex-matrix-subset"],
   },
   {
     id: "spinor",
