@@ -1,100 +1,102 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Complex multiplication · Math, seen</title>
   <link rel="stylesheet" href="site.css">
 </head>
 <body class="site-layout">
   <aside class="app-sidebar" data-app-nav></aside>
-  <div class="site-content">
-    <header>
-      <div class="eyebrow">Complex numbers · Linear algebra</div>
-      <h1>Complex multiplication moves the whole plane</h1>
-      <p class="intro">Choose any complex multiplier a + bi. The grid shows what happens to every point; the orange arrow tracks one particular input u + vi. Scrub slowly, then inspect exactly which equations are doing the work.</p>
+  <main class="site-content compact-workbench">
+    <header class="compact-header">
+      <h1>Complex multiplication</h1>
+      <p>One complex number moves the entire plane: rotation + uniform scaling.</p>
     </header>
     <div class="demo-layout">
-      <div class="demo-main">
-        <section class="panel">
-          <h2>1. Pick the multiplication</h2>
-          <div class="controls-grid">
-            <label class="field-label">Real part a <input id="a" type="number" step="any" value="2"></label>
-            <label class="field-label">Imaginary part b <input id="b" type="number" step="any" value="1"></label>
+      <section class="panel grid-panel">
+        <div class="plot-toolbar">
+          <strong>Cartesian grid</strong>
+          <div class="plot-actions" role="group" aria-label="Graph viewport">
+            <button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+            <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+            <button id="fit-view" title="Fit input and output to the view">Fit</button>
+            <button id="reset-view" title="Restore default view">Reset view</button>
           </div>
-          <div class="presets" aria-label="Examples">
-            <button class="preset" data-example="1,0">1 (identity)</button>
-            <button class="preset" data-example="0,1">i (quarter-turn)</button>
-            <button class="preset" data-example="-1,0">−1 (half-turn)</button>
+        </div>
+        <svg id="grid-svg" viewBox="0 0 760 510" tabindex="0" role="img"
+             aria-label="Zoomable and pannable plane, with original grid, transformed grid, and complex arrows. Drag to pan and scroll to zoom.">
+          <defs>
+            <clipPath id="grid-window"><rect x="0" y="0" width="760" height="510"></rect></clipPath>
+            <marker id="arrow-orange" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#bd7514"></path></marker>
+            <marker id="arrow-violet" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#7c3aed"></path></marker>
+            <marker id="arrow-teal" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#0d9488"></path></marker>
+          </defs>
+          <g id="reference-grid" clip-path="url(#grid-window)"></g>
+          <g id="moving-grid" clip-path="url(#grid-window)"></g>
+          <g id="grid-vectors" clip-path="url(#grid-window)"></g>
+        </svg>
+        <div class="plot-legend">
+          <span style="--line:#b4c4d9">original grid</span>
+          <span style="--line:#0d9488">transformed grid</span>
+          <span style="--line:#7c3aed">multiplier: image of 1</span>
+          <span style="--line:#bd7514">sample point</span>
+        </div>
+        <div class="compact-playbar">
+          <button id="play" class="primary">▶ Play</button>
+          <button id="reset">↺</button>
+          <input id="progress" type="range" min="0" max="1" step="0.001" value="0" aria-label="Transformation progress">
+          <output id="progress-label" for="progress">0%</output>
+        </div>
+        <div class="view-hint">Drag to pan · wheel or ± to zoom · <span id="view-label">54 px/unit</span></div>
+      </section>
+      <div class="demo-side compact-sidebar">
+        <section class="panel">
+          <div class="section-title"><h2>Multiplier</h2><output id="multiplier-summary">2 + i</output></div>
+          <div class="controls-grid">
+            <label class="field-label">Real part a <input id="a" type="text" inputmode="text" value="2" spellcheck="false" aria-label="Multiplier real part"></label>
+            <label class="field-label">Imaginary part b <input id="b" type="text" inputmode="text" value="1" spellcheck="false" aria-label="Multiplier imaginary part"></label>
+          </div>
+          <div class="presets" aria-label="Multiplication presets">
+            <button class="preset" data-example="1,0">1</button>
+            <button class="preset" data-example="0,1">90°</button>
+            <button class="preset" data-example="sqrt(2)/2,sqrt(2)/2">45° · ⅛ turn</button>
+            <button class="preset" data-example="sqrt(2)/2,-sqrt(2)/2">−45°</button>
+            <button class="preset" data-example="-1,0">180°</button>
             <button class="preset" data-example="2,1">2 + i</button>
-            <button class="preset" data-example="0,0">0 (collapse)</button>
+            <button class="preset" data-example="0,0">0</button>
           </div>
-          <p id="input-error" class="note" role="status" aria-live="polite"></p>
-          <div class="control-bar">
-            <button id="play" class="primary">▶ Play</button>
-            <button id="reset">Reset</button>
-            <label for="progress">Transformation</label>
-            <input id="progress" type="range" min="0" max="1" step="0.001" value="0" aria-label="Transformation progress">
-            <output id="progress-label" for="progress">0%</output>
+          <p id="input-error" class="validation-message" aria-live="polite"></p>
+          <div class="stats">
+            <div class="stat"><small>Scale |z|</small><strong id="radius"></strong></div>
+            <div class="stat"><small>Rotation arg(z)</small><strong id="angle"></strong></div>
           </div>
         </section>
-        <section class="panel" style="margin-top:16px">
-          <h2>2. Watch the Cartesian grid</h2>
-          <svg id="grid-svg" viewBox="0 0 760 520" role="img" aria-label="Cartesian grid transforming under complex multiplication">
-            <defs>
-              <clipPath id="grid-window"><rect x="0" y="0" width="760" height="520" rx="8"></rect></clipPath>
-              <marker id="arrow-orange" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="#c27817"></path></marker>
-              <marker id="arrow-blue" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="#2563eb"></path></marker>
-              <marker id="arrow-teal" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="#0d9488"></path></marker>
-            </defs>
-            <g id="reference-grid" clip-path="url(#grid-window)"></g>
-            <g id="moving-grid" clip-path="url(#grid-window)"></g>
-            <g id="grid-vectors" clip-path="url(#grid-window)"></g>
-          </svg>
-          <div class="legend">
-            <span style="--line:#becbdc">Original grid</span>
-            <span style="--line:#0d9488">Transformed grid</span>
-            <span style="--line:#2563eb">Transformed x-axis</span>
-            <span style="--line:#c27817">Chosen point</span>
-          </div>
-          <p class="note" style="margin-top:10px">This animation interpolates <em>rotation and uniform scale</em> from 1 to your multiplier. The grid is never sheared. For multiplication by 0, it collapses to a point; 0 has no meaningful angle.</p>
-        </section>
-      </div>
-      <div class="demo-side">
         <section class="panel">
-          <h2>3. Follow one point</h2>
-          <p class="note">The same multiplication acts on <em>every</em> point. Choose one input to see its coordinates change.</p>
+          <div class="section-title"><h2>Sample point</h2><output id="point-summary"></output></div>
           <div class="controls-grid">
-            <label class="field-label">Input real part u <input id="u" type="number" step="any" value="1"></label>
-            <label class="field-label">Input imaginary part v <input id="v" type="number" step="any" value="0.5"></label>
+            <label class="field-label">Real part u <input id="u" type="text" inputmode="text" value="1" spellcheck="false" aria-label="Point real part"></label>
+            <label class="field-label">Imaginary part v <input id="v" type="text" inputmode="text" value="1/2" spellcheck="false" aria-label="Point imaginary part"></label>
           </div>
-          <div class="math-caption">Current multiplier · animated</div>
-          <pre class="math-live math-box" id="current-product"></pre>
-          <div class="math-caption">Final multiplication · your chosen a + bi</div>
+          <pre class="math-live compact-math" id="current-product"></pre>
+        </section>
+        <section class="panel math-details">
+          <div class="section-title"><h2>One operation, two notations</h2></div>
+          <div class="math-caption">Expanded product</div>
           <pre class="math-live math-box" id="expanded-product"></pre>
-          <div class="stats" style="margin-top:12px">
-            <div class="stat"><small>Final scale |a + bi|</small><strong id="radius"></strong></div>
-            <div class="stat"><small>Final rotation arg(a + bi)</small><strong id="angle"></strong></div>
+          <div class="matrix-pair">
+            <div><div class="math-caption">Target matrix</div><pre class="math-live math-box" id="target-matrix"></pre></div>
+            <div><div class="math-caption">Animated matrix</div><pre class="math-live math-box" id="current-matrix"></pre></div>
           </div>
-        </section>
-        <section class="panel">
-          <h2>4. Read the matrix</h2>
-          <p class="note">These four numbers tell you where a point (x,y) moves. The matrix isn't a second operation: it's the same multiplication written in real coordinates.</p>
-          <div class="math-caption">Target matrix</div>
-          <pre class="math-live math-box" id="target-matrix"></pre>
-          <div class="math-caption">Matrix currently applied to the animated grid</div>
-          <pre class="math-live math-box" id="current-matrix"></pre>
-          <p class="note" id="matrix-check" style="margin-top:10px"></p>
-        </section>
-        <section class="panel wide-panel">
-          <h2>Equations used in this demo</h2>
-          <p class="note">These entries come from the shared equation catalog and point to the functions doing the numerical work.</p>
-          <div class="equation-list" id="equation-inspector"></div>
-          <p class="note" style="margin-top:12px"><a href="equations.html">Browse the whole equation library</a></p>
+          <p id="matrix-check" class="note" style="margin:8px 0 0"></p>
         </section>
       </div>
     </div>
-  </div>
+    <details class="panel reference-panel">
+      <summary><strong>Equations used in this demo</strong><span>Inspect definitions, intuition, and implementation</span></summary>
+      <div class="equation-list" id="equation-inspector"></div>
+      <a class="reference-link" href="equations.html">Full equation library</a>
+    </details>
+  </main>
   <script type="module" src="src/ui/navigation.js"></script>
   <script type="module" src="src/demos/complex-multiplication.js"></script>
 </body>
