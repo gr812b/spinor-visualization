@@ -1,4 +1,10 @@
 import { cMul, complexMatrix, applyMatrix2, cAbs, cArg, fromPolar, cConj, cAbs2, interpolateMultiplier } from './complex.js';
+import { basisRotationMatrix } from '../operators-v2.js';
+import {
+  matDag, matApply, spinorNorm2, normalizeSpinor, expectation, defaultToZBasis,
+  spinExpectationVectorFromDefaultBasis, magneticFieldHamiltonian,
+  magneticEvolutionOperator, evolveInField, fieldDirection,
+} from './spinor.js';
 
 // Human-facing explanations reference the exact named math functions used in demos.
 // There is no second implementation of the same numerical formulas here.
@@ -48,6 +54,80 @@ export const EQUATIONS = Object.freeze({
     functions: [interpolateMultiplier], source: "src/math/complex.js",
     visual: "polar",
   },
+
+  "spinor-normalization": {
+    title: "Normalized two-component spinor",
+    expression: "|ψ⟩ = [α, β]ᵀ,    |α|² + |β|² = 1",
+    why: "The spinor's two possible basis outcomes must have total probability one. A nonzero state can be rescaled to satisfy this.",
+    picture: "Each clock hand has a magnitude; squared magnitudes add to one.",
+    symbols: "α and β are complex amplitudes. A zero state cannot be normalized into a physical state.",
+    functions: [spinorNorm2, normalizeSpinor], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
+  "basis-rotation": {
+    title: "Spinor basis matrix",
+    expression: "U(θ,φ) = [[cos(θ/2), e^(−iφ) sin(θ/2)], [−e^(iφ) sin(θ/2), cos(θ/2)]]",
+    why: "This 2×2 unitary matrix is the specific basis convention used by the existing spinor demo.",
+    picture: "Moving a basis changes the two complex coordinates assigned to the same spinor.",
+    symbols: "θ, φ are basis angles in degrees in the controls, converted to radians for calculations.",
+    functions: [basisRotationMatrix], source: "src/operators-v2.js",
+    visual: "spinor",
+  },
+  "adjoint": {
+    title: "Conjugate transpose (dagger)",
+    expression: "(U†)ᵢⱼ = conjugate(Uⱼᵢ),    U†U = I for unitary U",
+    why: "Swap matrix rows and columns, then conjugate every complex entry. For a unitary basis matrix, this undoes U.",
+    picture: "A basis change can be reversed without changing total probability.",
+    symbols: "† means conjugate transpose; I is the identity matrix.",
+    functions: [matDag], source: "src/math/spinor.js",
+    visual: "matrix",
+  },
+  "basis-components": {
+    title: "State expressed in a different basis",
+    expression: "c_new = U† c_old,    (Mc)ᵢ = Σⱼ Mᵢⱼ cⱼ",
+    why: "Each displayed clock shows one component of the same state in a selected basis. The transformation changes coordinates, not the underlying state.",
+    picture: "The two clock hands change together as you rotate the basis.",
+    symbols: "c is the two-component complex state; U is the basis matrix.",
+    functions: [matDag, matApply], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
+  "pauli-expectation": {
+    title: "Spin expectation (Bloch vector)",
+    expression: "S = (⟨σx⟩, ⟨σy⟩, ⟨σz⟩),    ⟨σk⟩ = ψ† σk ψ",
+    why: "After converting the app's default ±y basis to a standard z basis, the three Pauli expectation values determine the displayed pink direction.",
+    picture: "Complex amplitudes and their relative phase determine one 3D direction.",
+    symbols: "σx=[[0,1],[1,0]], σy=[[0,−i],[i,0]], σz=[[1,0],[0,−1]].",
+    functions: [defaultToZBasis, expectation, spinExpectationVectorFromDefaultBasis],
+    source: "src/math/spinor.js",
+    visual: "spinor",
+  },
+  "magnetic-hamiltonian": {
+    title: "Magnetic-field Hamiltonian (effective model)",
+    expression: "H = (B/2) U σz U†,    with ℏ = 1",
+    why: "The magnetic control sets the relative energy splitting used in the simulator. The basis matrix orients the operator; this is an effective model, not a calibrated SI field/gyromagnetic ratio.",
+    picture: "The field sets the axis about which the spinor's relative phase evolves.",
+    symbols: "B is the simulator's field-magnitude parameter, not necessarily teslas; σz is a Pauli matrix.",
+    functions: [magneticFieldHamiltonian], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
+  "magnetic-evolution": {
+    title: "Magnetic time-evolution operator",
+    expression: "W(Δt) = U diag(e^(−iBΔt/2), e^(+iBΔt/2)) U†,    ψ(t+Δt)=W ψ(t)",
+    why: "The two field-aligned components gain opposite phases. Transforming back to the displayed basis produces the existing precession animation.",
+    picture: "Each component rotates in complex phase; the corresponding Bloch vector precesses.",
+    symbols: "Δt is elapsed seconds in the animation; ℏ = 1 in this model.",
+    functions: [magneticEvolutionOperator, evolveInField], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
+  "field-direction": {
+    title: "Field direction in the renderer",
+    expression: "n_lab = (sin θ sin φ, cos θ, −sin θ cos φ)",
+    why: "The visualization uses a y-up lab frame. This equation converts the spherical-angle sliders into its displayed arrow direction.",
+    picture: "Move θ toward 0 to point upward; changing φ rotates the field around the vertical axis.",
+    symbols: "Angles are converted to radians before applying sine/cosine. This is the display-frame convention.",
+    functions: [fieldDirection], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
 });
 
 export const DEMOS = Object.freeze([
@@ -65,6 +145,6 @@ export const DEMOS = Object.freeze([
     category: "Quantum mechanics",
     href: "spinor.html",
     summary: "Explore two-component spinors, basis directions, and the magnetic-field animation.",
-    equationIds: ["complex-product", "conjugate"],
+    equationIds: ["complex-product", "conjugate", "spinor-normalization", "basis-rotation", "adjoint", "basis-components", "pauli-expectation", "magnetic-hamiltonian", "magnetic-evolution", "field-direction"],
   },
 ]);
