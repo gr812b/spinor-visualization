@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Equation library · Math, seen</title><link rel="stylesheet" href="site.css"></head>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <main class="site-content">
+    <header>
+      <div class="eyebrow">Shared reference</div>
+      <h1>Equation library</h1>
+      <p class="intro">A place to revisit the reason behind each formula. Entries identify the implementation used by the demos, so the displayed equations and numerical operations have one shared source.</p>
+    </header>
+    <section class="panel" style="max-width:900px">
+      <div id="all-equations" class="equation-list"></div>
+    </section>
+  </main>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module">
+    import { mountEquationLibrary } from './src/ui/equation-library.js';
+    mountEquationLibrary(document.getElementById('all-equations'), undefined, true);
+  </script>
+</body>
+</html>
