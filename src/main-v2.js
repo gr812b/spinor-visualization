@@ -8,7 +8,7 @@ const threeContainer = document.getElementById('three');
 
 const basisView = new Basis3D(threeContainer);
 
-const basisPalette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0f766e'];
+const basisPalette = ['#8bb4ff', '#ff9299', '#61dc9e', '#ffbf6e', '#b6a0ff', '#55ddcb'];
 
 let bases = [];
 
