@@ -59,7 +59,18 @@ function makeVisual(kind) {
     el('line',{x1:90,y1:70,x2:x,y2:y,stroke:color,'stroke-width':3,'stroke-linecap':'round'});
     el('circle',{cx:x,cy:y,r:4,fill:color});
   };
-  if (kind === 'spinor') {
+  if(kind === 'ellipse'){
+    el('circle',{cx:93,cy:48,r:30,fill:'none',stroke:'#758ca9','stroke-width':1.5,'stroke-dasharray':'4 4'});
+    el('ellipse',{cx:177,cy:48,rx:62,ry:24,fill:'#55ddcb','fill-opacity':.10,stroke:'#55ddcb','stroke-width':2});
+    el('line',{x1:115,y1:48,x2:239,y2:48,stroke:'#b6a0ff','stroke-dasharray':'4 4'});
+    el('text',{x:118,y:16,fill:'#a7b8ce','font-size':11}).textContent='M';
+  }else if(kind === 'eigen'){
+    el('circle',{cx:134,cy:49,r:34,fill:'none',stroke:'#6a7c95','stroke-dasharray':'4 4'});
+    el('line',{x1:47,y1:84,x2:221,y2:14,stroke:'#ff83c8','stroke-width':2});
+    el('line',{x1:81,y1:5,x2:193,y2:91,stroke:'#a6bfff','stroke-width':2});
+    el('text',{x:228,y:20,fill:'#ff83c8','font-size':12}).textContent='λ₁';
+    el('text',{x:200,y:86,fill:'#a6bfff','font-size':12}).textContent='λ₂';
+  }else if (kind === 'spinor') {
     el('circle',{cx:105,cy:47,r:34,stroke:'#7894b7','stroke-width':1,fill:'#172b45'});
     el('ellipse',{cx:105,cy:47,rx:34,ry:12,stroke:'#7f9cbe','stroke-width':1,fill:'none'});
     el('line',{x1:105,y1:47,x2:124,y2:15,stroke:'#ff82c9','stroke-width':3});
