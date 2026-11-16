@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Matrix transformations · Math, seen</title>
+  <meta name="description" content="Transform the entire unit circle with any real 2×2 matrix. Explore eigenvectors, complex multiplication, and the geometry of linear maps.">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <main class="site-content compact-workbench matrix-workbench">
+    <header class="compact-header">
+      <h1>Matrix transformations</h1>
+      <p>See what a linear map does to an entire circle, not just one vector.</p>
+    </header>
+    <div class="demo-layout">
+      <section class="panel grid-panel">
+        <div class="plot-toolbar">
+          <strong>Unit circle → transformed curve</strong>
+          <div class="plot-actions" role="group" aria-label="Graph viewport">
+            <button id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+            <button id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+            <button id="fit-view" title="Fit unit circle and transformed curve">Fit</button>
+            <button id="reset-view" title="Reset pan and zoom">Reset view</button>
+          </div>
+        </div>
+        <svg id="matrix-plot" viewBox="0 0 760 510" role="img" tabindex="0"
+          aria-label="Interactive unit circle and its full matrix-transformed image. Drag the amber handle on the original circle to choose a vector. Drag empty space to pan and scroll to zoom.">
+          <defs>
+            <clipPath id="matrix-clip"><rect x="0" y="0" width="760" height="510"/></clipPath>
+            <marker id="tip-violet" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L7 4 L0 8Z" fill="#b6a0ff"/>
+            </marker>
+            <marker id="tip-teal" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L7 4 L0 8Z" fill="#55ddcb"/>
+            </marker>
+            <marker id="tip-gold" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L7 4 L0 8Z" fill="#ffbf6e"/>
+            </marker>
+          </defs>
+          <g clip-path="url(#matrix-clip)">
+            <g id="plot-grid"></g>
+            <g id="plot-eigens"></g>
+            <g id="unit-world">
+              <circle id="unit-reference" cx="0" cy="0" r="1" fill="none"
+                stroke="#9db0c8" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke"/>
+              <!-- SVG's native circle remains an exact continuous curve. This group
+                   receives the full matrix affine transformation every frame. -->
+              <g id="moving-shape">
+                <circle cx="0" cy="0" r="1" fill="#55ddcb" fill-opacity=".10"
+                  stroke="#55ddcb" stroke-width="3" vector-effect="non-scaling-stroke"/>
+                <line x1="0" y1="0" x2="1" y2="0" stroke="#b6a0ff"
+                  stroke-width="2" vector-effect="non-scaling-stroke"/>
+                <line x1="0" y1="0" x2="0" y2="1" stroke="#55ddcb"
+                  stroke-width="2" vector-effect="non-scaling-stroke"/>
+              </g>
+            </g>
+            <g id="plot-degenerate"></g>
+            <g id="plot-vectors"></g>
+          </g>
+        </svg>
+        <div class="plot-legend">
+          <span style="--line:#9db0c8">original unit circle</span>
+          <span style="--line:#55ddcb">transformed curve</span>
+          <span style="--line:#b6a0ff">image of (1,0)</span>
+          <span style="--line:#ffbf6e">chosen vector</span>
+        </div>
+        <div class="compact-playbar">
+          <button id="play" class="primary">▶ Play</button>
+          <button id="reset">↺</button>
+          <input id="progress" type="range" min="0" max="1" value="0" step=".001" aria-label="Matrix interpolation progress">
+          <output id="progress-label" for="progress">0%</output>
+        </div>
+        <div class="view-hint">Drag the gold dot to choose a vector · drag to pan · scroll to zoom · <span id="view-label"></span></div>
+      </section>
+      <div class="demo-side compact-sidebar">
+        <section class="panel">
+          <div class="section-title"><h2>Choose transformation</h2></div>
+          <div class="input-tabs" role="tablist" aria-label="Matrix input">
+            <button id="tab-matrix" type="button" role="tab" aria-selected="true" aria-controls="matrix-inputs" class="active">Matrix</button>
+            <button id="tab-complex" type="button" role="tab" aria-selected="false" aria-controls="complex-inputs">Complex number</button>
+          </div>
+          <div id="matrix-inputs" role="tabpanel" aria-labelledby="tab-matrix">
+            <div class="matrix-input-layout">
+              <label class="field-label">a <input id="m11" type="text" value="2" spellcheck="false" aria-label="Matrix row 1 column 1"></label>
+              <label class="field-label">b <input id="m12" type="text" value="1" spellcheck="false" aria-label="Matrix row 1 column 2"></label>
+              <label class="field-label">c <input id="m21" type="text" value="1" spellcheck="false" aria-label="Matrix row 2 column 1"></label>
+              <label class="field-label">d <input id="m22" type="text" value="2" spellcheck="false" aria-label="Matrix row 2 column 2"></label>
+            </div>
+            <div class="presets">
+              <button class="preset" data-matrix="2,1,1,2">Symmetric stretch</button>
+              <button class="preset" data-matrix="2,0,0,1">Horizontal stretch</button>
+              <button class="preset" data-matrix="1,1,0,1">Shear</button>
+              <button class="preset" data-matrix="-1,0,0,1">Reflection</button>
+              <button class="preset" data-matrix="0,-1,1,0">90° rotation</button>
+              <button class="preset" data-matrix="1,0,0,0">Collapse</button>
+            </div>
+          </div>
+          <div id="complex-inputs" role="tabpanel" aria-labelledby="tab-complex" hidden>
+            <div class="controls-grid">
+              <label class="field-label">Real part <input id="zr" type="text" value="-1" spellcheck="false"></label>
+              <label class="field-label">Imaginary part <input id="zi" type="text" value="1" spellcheck="false"></label>
+            </div>
+            <div class="presets">
+              <button class="preset" data-complex="sqrt(2)/2,sqrt(2)/2">45°</button>
+              <button class="preset" data-complex="-1,1">−1 + i</button>
+              <button class="preset" data-complex="0,1">i</button>
+              <button class="preset" data-complex="-1,0">−1</button>
+              <button class="preset" data-complex="0,0">0</button>
+            </div>
+          </div>
+          <p class="validation-message" id="input-error" aria-live="polite"></p>
+        </section>
+        <section class="panel">
+          <div class="section-title"><h2>The matrix</h2><span class="note" id="recognized-complex"></span></div>
+          <div class="matrix-pair">
+            <div><div class="math-caption">Target M</div><div class="matrix-live" id="target-matrix"></div></div>
+            <div><div class="math-caption">Animated M(t)</div><div class="matrix-live" id="current-matrix"></div></div>
+          </div>
+          <div class="matrix-facts">
+            <span>det M</span><strong id="det-value"></strong>
+            <span>Circle image</span><strong id="shape-kind"></strong>
+            <span>Principal stretches</span><strong id="singular-values"></strong>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-title">
+            <h2>Track a unit vector</h2>
+            <output class="note" id="angle-label">30°</output>
+          </div>
+          <label class="field-label">Starting direction
+            <input type="range" id="vector-angle" min="0" max="360" step="1" value="30">
+          </label>
+          <p class="vector-readout" id="vector-readout"></p>
+          <label class="eigen-toggle"><input type="checkbox" id="show-eigens" checked> Show target eigendirections</label>
+          <p class="note" id="eigen-summary"></p>
+          <p class="note" id="geometry-summary"></p>
+        </section>
+      </div>
+    </div>
+    <details class="panel reference-panel">
+      <summary><strong>Equations used here</strong><span>Inspect the math and geometry</span></summary>
+      <div id="equation-inspector" class="equation-list"></div>
+      <a class="reference-link" href="equations.html">Full equation library</a>
+    </details>
+  </main>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module" src="src/demos/matrix-transformation.js"></script>
+</body>
+</html>
