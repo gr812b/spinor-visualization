@@ -3,7 +3,7 @@ import { basisRotationMatrix } from '../operators-v2.js';
 import {
   matDag, matApply, spinorNorm2, normalizeSpinor, expectation, defaultToZBasis,
   spinExpectationVectorFromDefaultBasis, magneticFieldHamiltonian,
-  magneticEvolutionOperator, evolveInField, fieldDirection,
+  magneticEvolutionOperator, evolveInField, fieldDirection, precessionGeometry,
 } from './spinor.js';
 
 // Human-facing explanations reference the exact named math functions used in demos.
@@ -119,6 +119,15 @@ export const EQUATIONS = Object.freeze({
     functions: [magneticEvolutionOperator, evolveInField], source: "src/math/spinor.js",
     visual: "spinor",
   },
+  "precession-geometry": {
+    title: "Precession circle as a vector projection",
+    expression: "S∥ = (S·n)n,    S⊥ = S − S∥,    radius = |S⊥|",
+    why: "For a fixed field direction, the spin expectation keeps a constant parallel component; the perpendicular component traces the circle.",
+    picture: "The circle is perpendicular to the magnetic-field axis and centered on the projection of the pink arrow onto that axis.",
+    symbols: "S is the spin expectation; n is the unit field direction.",
+    functions: [precessionGeometry], source: "src/math/spinor.js",
+    visual: "spinor",
+  },
   "field-direction": {
     title: "Field direction in the renderer",
     expression: "n_lab = (sin θ sin φ, cos θ, −sin θ cos φ)",
@@ -145,6 +154,6 @@ export const DEMOS = Object.freeze([
     category: "Quantum mechanics",
     href: "spinor.html",
     summary: "Explore two-component spinors, basis directions, and the magnetic-field animation.",
-    equationIds: ["complex-product", "conjugate", "spinor-normalization", "basis-rotation", "adjoint", "basis-components", "pauli-expectation", "magnetic-hamiltonian", "magnetic-evolution", "field-direction"],
+    equationIds: ["complex-product", "conjugate", "polar-form", "spinor-normalization", "basis-rotation", "adjoint", "basis-components", "pauli-expectation", "magnetic-hamiltonian", "magnetic-evolution", "field-direction", "precession-geometry"],
   },
 ]);
