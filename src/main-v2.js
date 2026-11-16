@@ -1,3 +1,4 @@
+import { cConj } from './math/complex.js';
 import { Clock } from './clock.js?v=19';
 import { Basis3D } from './basis3d.js?v=19';
 import { complex, cMul, cAdd, basisRotationMatrix } from './operators-v2.js?v=16';
@@ -20,9 +21,8 @@ let playing = false;
 
 const basisListEl = document.getElementById('basisList');
 
-function conj(a){ return { re: a.re, im: -a.im }; }
 function matDag(U){
-  return [[conj(U[0][0]), conj(U[1][0])],[conj(U[0][1]), conj(U[1][1])]];
+  return [[cConj(U[0][0]), cConj(U[1][0])],[cConj(U[0][1]), cConj(U[1][1])]];
 }
 function matApply(U, v){
   const a = cAdd(cMul(U[0][0], v[0]), cMul(U[0][1], v[1]));
