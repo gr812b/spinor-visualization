@@ -1,4 +1,4 @@
-import { fieldDirection } from './math/spinor.js';
+import { fieldDirection, precessionGeometry } from './math/spinor.js';
 // Minimal Three.js arrow visualization for a basis direction
 export class Basis3D {
   constructor(container) {
@@ -363,11 +363,14 @@ export class Basis3D {
       return;
     }
 
-    const center = axis.clone().multiplyScalar(s.dot(axis));
-    const perp = s.clone().sub(center);
-    const radius = perp.length();
-    if (radius < 1e-6) {
-      if (this.precessionCircle) this.precessionCircle.visible = false;
+    const geometry=precessionGeometry(
+      {x:s.x,y:s.y,z:s.z},{x:axis.x,y:axis.y,z:axis.z}
+    );
+    const center=new THREE.Vector3(geometry.center.x,geometry.center.y,geometry.center.z);
+    const perp=new THREE.Vector3(geometry.perpendicular.x,geometry.perpendicular.y,geometry.perpendicular.z);
+    const radius=geometry.radius;
+    if(radius < 1e-6) {
+      if(this.precessionCircle) this.precessionCircle.visible=false;
       return;
     }
 
