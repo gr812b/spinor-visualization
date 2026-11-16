@@ -86,11 +86,12 @@ function label(group,point,text,color,dx=8,dy=-10) {
     'paint-order':'stroke',stroke:'#0c1626','stroke-width':3.5,
   },text);
 }
-function drawGrid(matrix,group,color,opacity,width) {
+function drawGrid(matrix,group,color,opacity,width,step) {
   const mag=Math.hypot(matrix[0][0],matrix[1][0]);
   if(mag<1e-9) return;
   const pixelsPerUnit=view.pixels*mag;
-  const step=niceGridStep(pixelsPerUnit);
+  // Use the SAME input-space lattice spacing for both grids.
+  // Only the transform changes positions; it must not independently resample lines.
   const offset=Math.hypot(W/2+view.panX,H/2+view.panY);
   const reach=Math.max(offset,Math.hypot(W/2-view.panX,H/2-view.panY))+W;
   const extent=Math.min(1e12,reach/Math.max(pixelsPerUnit,1e-10));
@@ -139,11 +140,14 @@ function render() {
   const matrixPoint=applyMatrix2(currentMatrix,[u,v]);
 
   reference.replaceChildren();moving.replaceChildren();vectors.replaceChildren();
-  drawGrid([[1,0],[0,1]],reference,'#3c506c',.55,1.05);
+  // Select the underlying lattice once per frame, based on viewport zoom alone.
+  // Both the original and transformed grids share every lattice coordinate.
+  const gridStep=niceGridStep(view.pixels);
+  drawGrid([[1,0],[0,1]],reference,'#3c506c',.55,1.05,gridStep);
   const e=Math.max(50,(W+H+Math.abs(view.panX)+Math.abs(view.panY))/view.pixels);
   line(reference,[-e,0],[e,0],'#9eafc7',1.5,.65);
   line(reference,[0,-e],[0,e],'#9eafc7',1.5,.65);
-  const tickStep=niceGridStep(view.pixels);
+  const tickStep=gridStep;
   const nTicks=Math.min(26,Math.ceil(e/tickStep));
   for(let k=-nTicks;k<=nTicks;k++) {
     if(k===0)continue;
@@ -155,7 +159,7 @@ function render() {
       svgNode(reference,'text',{x:py[0]+5,y:py[1]-4,fill:'#9eb1c8','font-size':10},fmt(k*tickStep));
     }
   }
-  drawGrid(currentMatrix,moving,'#55ddcb',.72,1.3);
+  drawGrid(currentMatrix,moving,'#55ddcb',.72,1.3,gridStep);
   const currentOne=applyMatrix2(currentMatrix,[1,0]);
   const currentI=applyMatrix2(currentMatrix,[0,1]);
   const one=[currentOne[0],currentOne[1]], imaginary=[currentI[0],currentI[1]];
