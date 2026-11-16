@@ -194,3 +194,95 @@ body.site-layout { grid-template-columns:205px minmax(0,1fr); }
 .spinor-area .basis-card { border-radius:8px; }
 .spinor-area .basis-card input { accent-color:var(--accent); }
 .spinor-area .clock-card { border-radius:9px; }
+
+/* Shared typeset 2×2 matrices: true square brackets, aligned cells, clear columns. */
+.matrix-live {
+  display:flex; align-items:center; justify-content:center; padding:8px 6px;
+  min-height:68px; min-width:0; overflow-x:auto; overflow-y:hidden;
+  border-radius:8px; background:var(--surface); color:var(--ink);
+  font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums;
+}
+.matrix2 {
+  display:inline-flex; align-items:center; position:relative; flex:none;
+  border-left:2px solid #a7b8ce; border-right:2px solid #a7b8ce;
+  padding:5px 9px;
+}
+.matrix2::before,.matrix2::after {
+  content:''; position:absolute; top:-1px; bottom:-1px; width:7px;
+  border-top:2px solid #a7b8ce; border-bottom:2px solid #a7b8ce;
+  pointer-events:none;
+}
+.matrix2::before {left:0}
+.matrix2::after {right:0}
+.matrix2-values {
+  display:grid; grid-template-columns:repeat(2,max-content); gap:4px 10px;
+}
+.matrix2-value {text-align:right; min-width:3.6ch; white-space:nowrap;}
+
+/* Dedicated matrix/unit-circle workbench. */
+.matrix-workbench .demo-layout { grid-template-columns:minmax(0,1.5fr) minmax(355px,1fr); }
+#matrix-plot {
+  display:block; width:100%; height:auto; border:1px solid var(--border);
+  border-radius:9px; background:#0c1626; touch-action:none;
+  cursor:grab; user-select:none;
+}
+.matrix-workbench .input-tabs {
+  display:grid; grid-template-columns:1fr 1fr; background:var(--surface);
+  border:1px solid var(--border); border-radius:9px; padding:3px;
+  gap:4px; margin:0 0 10px;
+}
+.matrix-workbench .input-tabs button {
+  background:transparent; border:0; font-size:12px; padding:5px 7px;
+  color:var(--muted); border-radius:6px;
+}
+.matrix-workbench .input-tabs button.active {
+  background:var(--surface-raised); box-shadow:0 1px 5px #0005;
+  color:var(--ink); font-weight:700;
+}
+.matrix-workbench .matrix-input-layout {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px 12px; padding:0 12px 3px;
+  position:relative;
+}
+.matrix-input-layout::before,.matrix-input-layout::after {
+  content:''; position:absolute; top:2px; bottom:4px; width:6px;
+  border-top:2px solid #788ba7; border-bottom:2px solid #788ba7;
+}
+.matrix-input-layout::before {left:0; border-left:2px solid #788ba7}
+.matrix-input-layout::after {right:0; border-right:2px solid #788ba7}
+.matrix-workbench [hidden] {display:none !important}
+.matrix-workbench .matrix-pair {gap:10px}
+.matrix-workbench .matrix-facts {
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  align-items:baseline; gap:4px 14px; padding-top:9px;
+  font-size:12px;
+}
+.matrix-facts span {color:var(--muted)}
+.matrix-facts strong {font-weight:680; text-align:right; font-variant-numeric:tabular-nums}
+.matrix-workbench .eigen-toggle {
+  display:flex; align-items:center; gap:7px; margin:9px 0;
+  font-size:12px; color:var(--ink);
+}
+.matrix-workbench .eigen-toggle input {accent-color:var(--accent)}
+.matrix-workbench .vector-readout {
+  background:var(--surface); padding:7px 9px; border-radius:6px;
+  font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  margin:8px 0; white-space:normal; overflow-wrap:anywhere;
+}
+.matrix-workbench #eigen-summary,
+.matrix-workbench #geometry-summary {margin-top:7px; margin-bottom:0}
+.matrix-workbench #recognized-complex {font:11px/1.25 ui-monospace,monospace; max-width:60%; text-align:right; overflow-wrap:anywhere}
+.matrix-workbench .compact-sidebar .panel {padding:12px 14px}
+.matrix-workbench input[type=range] {width:100%}
+@media(max-width:1150px) {
+  .matrix-workbench .demo-layout {grid-template-columns:minmax(0,1.25fr) minmax(330px,1fr)}
+}
+@media(max-width:990px) {
+  .matrix-workbench .demo-layout {grid-template-columns:1fr}
+}
+@media(max-width:480px) {
+  .matrix-workbench .matrix-pair {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .matrix-live {font-size:11px;padding:7px 2px}
+  .matrix2-values {gap:4px 6px}
+}
