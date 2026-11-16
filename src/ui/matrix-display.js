@@ -30,3 +30,21 @@ export function renderMatrix2(target,matrix) {
   root.setAttribute('aria-label','2 by 2 matrix: row one '+matrix[0].map(formatReal).join(', ')+
     '; row two '+matrix[1].map(formatReal).join(', '));
 }
+
+export function renderVector2(target,vector) {
+  let root=target.querySelector('.vector2');
+  if(!root) {
+    target.replaceChildren();
+    root=document.createElement('span');
+    root.className='matrix2 vector2';
+    root.setAttribute('role','img');
+    const grid=document.createElement('span');
+    grid.className='vector2-values';
+    grid.append(document.createElement('span'),document.createElement('span'));
+    root.append(grid);
+    target.append(root);
+  }
+  const cells=root.querySelectorAll('.vector2-values > span');
+  for(let i=0;i<2;i++)cells[i].textContent=formatReal(vector[i]);
+  root.setAttribute('aria-label','column vector '+vector.map(formatReal).join(', '));
+}
