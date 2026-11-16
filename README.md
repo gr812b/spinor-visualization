@@ -1,29 +1,63 @@
-# Spinor Visualization
+# Math, seen
 
-Minimal web demo to visualize two-component spinors as clocks and view basis direction in 3D.
+A growing, build-free interactive mathematics reference, starting from the original Spinor Visualization project.
 
-How to run
+## Pages
+- `index.html` — directory of demos
+- `complex-multiplication.html` — editable complex multiplier and input point, 6.5-second grid animation (play/pause/scrub), matching product expansion and 2×2 matrix
+- `spinor.html` — original spinor and 3D basis visualization, retained
+- `equations.html` — shared equation reference
 
-- Open `index.html` in a browser (no build step required). For a local server, run e.g.: 
+## Run locally
+Serve the folder with any static server:
 
-```powershell
+```sh
 python -m http.server 8000
 ```
 
-then open http://localhost:8000
+Open [http://localhost:8000](http://localhost:8000). ES module imports are most reliable when served rather than opened as `file://` URLs.
 
-What is included
+For mathematical tests, with Node 22 or newer:
 
-- `index.html` — demo page and controls
-- `style.css` — basic layout
-- `src/clock.js` — 2D clock component
-- `src/basis3d.js` — Three.js arrow showing basis direction
-- `src/operators.js` — spinor math (complex helpers, SU(2) rotations)
-- `src/main.js` — app wiring, UI, time evolution (Larmor-like)
+```sh
+npm test
+```
 
-Next steps
+No npm install, bundler, build, or backend is needed. The spinor visualization loads Three.js from an external CDN (and therefore needs internet); the complex grid demo has no external runtime dependency.
 
-- Improve numerical stability and normalization
-- Add UI to add arbitrary basis angles and remove bases
-- Add explicit basis-change operator controls (theta/phi inputs per basis)
-- Add pausing, resetting, and speed multipliers
+## Structure and extending the library
+
+```
+src/
+  math/
+    complex.js           # Single numeric source for complex operations
+    equations.js         # Named equations, intuition, implementations, demo registry
+  ui/
+    navigation.js        # Sidebar across pages
+    equation-library.js  # Reused expandable equation inspector and mini visuals
+  demos/
+    complex-multiplication.js
+  operators-v2.js        # Original spinor operations; imports shared complex arithmetic
+  main-v2.js             # Original spinor UI
+tests/
+  complex.test.mjs       # Matrix/product equivalence, conjugation, polar, interpolation
+```
+
+To add a demo:
+1. Create a standalone HTML page using `site.css` and `src/ui/navigation.js`.
+2. Reuse functions from `src/math/complex.js` (or create an appropriately scoped shared math module).
+3. Add any new mathematical identities to `src/math/equations.js` with explanations, associated source functions, and visual hints.
+4. Add one entry to the `DEMOS` registry and render `mountEquationLibrary()` with its `equationIds`.
+5. Add tests for mathematical invariants rather than just screenshot appearance.
+
+**Important:** The equation catalog is explanatory metadata, not a second numeric implementation. It identifies the functions that perform computations, while demos import those exact shared functions. If an equation changes, update the implementation, its explanation, and its tests together.
+
+## Mathematical choices in the complex grid demo
+
+Let `z = a + bi` and `w = u + vi`. The product is `zw = (au-bv) + (av+bu)i` and its real-plane matrix is `[[a,-b],[b,a]]`.
+
+The *animation* intentionally goes from `1` to `z` by linearly interpolating the **magnitude** and **angle**, not by interpolating the matrix coefficients. This keeps every intermediate transformation a rotation plus uniform scale. It is a visualization choice, not a time-evolution law. For `z = 0`, the grid collapses; the argument of zero is undefined.
+
+## Hosting
+
+Because the site is static, you can host the folder with GitHub Pages, Caddy, or any static web server. Deep links are normal `.html` files; no router rewrite rules are required.
