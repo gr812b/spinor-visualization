@@ -91,3 +91,66 @@ button.preset { padding: 6px 10px; font-size: 12px; }
   .spinor-area #visuals { display: block; }
   .spinor-area #clocks, .spinor-area #three { width: 100%; margin-top: 10px; }
 }
+
+/* Dense workbench: keep the graph, inputs and algebra together on desktop. */
+.compact-workbench.site-content { padding-top: 15px; padding-bottom: 40px; }
+.compact-header { display:flex; flex-wrap:wrap; gap:4px 16px; align-items:baseline; margin-bottom: 10px !important; }
+.compact-header h1 { font-size:clamp(23px,2.2vw,30px); margin:0; }
+.compact-header p { color:var(--muted); font-size:13px; margin:0; }
+.compact-workbench .demo-layout { grid-template-columns:minmax(0,1.5fr) minmax(345px,1fr); gap:12px; }
+.compact-workbench .panel { padding:12px 14px; border-radius:11px; }
+.compact-workbench h2 { font-size:15px; line-height:1.2; margin:0; }
+.grid-panel { min-width:0; }
+.plot-toolbar, .section-title { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-bottom:9px; }
+.plot-toolbar strong { font-size:15px; }
+.plot-actions { display:flex; gap:4px; flex-wrap:wrap; }
+.compact-workbench .plot-actions button { padding:3px 8px; font-size:12px; min-height:29px; }
+#grid-svg { touch-action:none; cursor:grab; background:#f8fbff; user-select:none; }
+#grid-svg g { pointer-events:none; }
+.plot-legend { display:flex; flex-wrap:wrap; gap:3px 12px; font-size:11px; color:var(--muted); margin:6px 0 2px; }
+.plot-legend span::before { content:''; display:inline-block; width:12px; height:3px; margin-right:5px; background:var(--line); vertical-align:middle; }
+.compact-playbar { display:flex; gap:7px; align-items:center; margin-top:8px; }
+.compact-playbar button { padding:5px 9px; font-size:12px; }
+.compact-playbar input { flex:1; min-width:30px; accent-color:var(--accent); }
+.compact-playbar output { font-size:12px; width:37px; text-align:right; font-variant-numeric:tabular-nums; }
+.view-hint { margin-top:2px; color:var(--muted); font-size:11px; }
+.compact-sidebar { display:grid !important; grid-template-columns:1fr; gap:10px; }
+.compact-sidebar .section-title output { max-width:55%; overflow-wrap:anywhere; color:var(--accent); font-weight:700; font-size:12px; }
+.compact-sidebar .controls-grid { gap:8px; }
+.compact-sidebar .field-label { font-size:11px; gap:3px; }
+.compact-sidebar .field-label input { padding:6px 7px; font-size:13px; }
+.compact-sidebar .presets { margin-top:8px; gap:4px; }
+.compact-sidebar button.preset { padding:4px 7px; font-size:11px; }
+.validation-message { color:#af3c2d; font-size:11px; margin:4px 0; min-height:0; }
+.validation-message:empty { display:none; }
+.compact-sidebar .stats { margin-top:8px; }
+.compact-sidebar .stat { padding:5px 9px; }
+.compact-sidebar .stat small { font-size:10px; }
+.compact-sidebar .stat strong { font-size:14px; }
+.compact-math { background:#f3f7fa; padding:8px; margin-top:8px; border-radius:7px; font-size:12px; line-height:1.45; overflow-x:auto; }
+.compact-sidebar .math-box { margin-top:4px; padding:8px; font-size:11px; line-height:1.5; overflow-x:auto; }
+.compact-sidebar .math-caption { margin:7px 0 2px; font-size:10px; }
+.matrix-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.matrix-pair > div { min-width:0; }
+.reference-panel { margin-top:12px; }
+.reference-panel > summary { cursor:pointer; display:flex; flex-wrap:wrap; align-items:center; gap:7px 15px; }
+.reference-panel > summary span { color:var(--muted); font-size:12px; }
+.reference-panel[open] > summary { margin-bottom:12px; }
+.reference-panel .equation-list { grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); align-items:start; }
+.reference-link { display:inline-block; margin-top:10px; font-size:13px; }
+@media(max-width: 1180px) {
+  .compact-workbench .demo-layout { grid-template-columns:minmax(0,1.2fr) minmax(320px,1fr); }
+}
+@media(max-width: 990px) {
+  .compact-workbench .demo-layout { grid-template-columns:1fr; }
+  .compact-sidebar { grid-template-columns:repeat(2,minmax(0,1fr)); display:grid !important; }
+  .compact-sidebar .math-details { grid-column:1/-1; }
+}
+@media(max-width: 640px) {
+  .compact-sidebar { grid-template-columns:1fr; }
+  .compact-sidebar .math-details { grid-column:auto; }
+  .compact-header { display:block; }
+  .compact-header p { margin-top:4px; }
+  .plot-actions { gap:3px; }
+  .compact-workbench .plot-actions button { padding:3px 6px; }
+}
