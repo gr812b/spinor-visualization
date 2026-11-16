@@ -3,6 +3,10 @@
 import { complexMatrix } from './complex.js';
 
 export const IDENTITY2 = Object.freeze([[1,0],[0,1]]);
+// Parametrization of the complete original unit circle.
+export function unitCirclePoint(angleRad) {
+  return [Math.cos(angleRad),Math.sin(angleRad)];
+}
 
 export function interpolateMatrix2(target, progress) {
   const t=Math.max(0,Math.min(1,progress));
