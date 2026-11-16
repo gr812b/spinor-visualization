@@ -4,7 +4,8 @@ A growing, build-free interactive mathematics reference, starting from the origi
 
 ## Pages
 - `index.html` — directory of demos
-- `complex-multiplication.html` — editable complex multiplier and point (fractions and radicals supported), 6.5-second grid animation (play/pause/scrub), zoom/pan/fit, matching product expansion and 2×2 matrix
+- `complex-multiplication.html` — editable complex multiplier and point (fractions and radicals supported), 6.5-second grid animation (play/pause/scrub), zoom/pan/fit, matching product expansion and readable 2×2 matrix
+- `matrix-transformation.html` — arbitrary real 2×2 matrices and complex multipliers as alternate inputs; an exactly transformed **continuous SVG unit circle**, draggable vectors, eigenvectors, zoom/pan/fit, and play/pause/scrub
 - `spinor.html` — original spinor and 3D basis visualization, retained
 - `equations.html` — shared equation reference
 
@@ -32,18 +33,22 @@ src/
   math/
     complex.js           # Single numeric source for complex operations
     parse-scalar.js      # Safe fraction and radical input parser
+    matrix2.js           # Matrix interpolation, eigenvectors, determinant, ellipse geometry
     viewport.js          # Reusable screen/world mapping and zoom/fit calculations
     spinor.js            # Spinor normalization, matrices, field operator, evolution, precession
     equations.js         # Named equations, intuition, implementations, demo registry
   ui/
     navigation.js        # Sidebar across pages
     equation-library.js  # Reused expandable equation inspector and mini visuals
+    matrix-display.js    # Shared bracketed matrices and column-vector typography
   demos/
     complex-multiplication.js
+    matrix-transformation.js
   operators-v2.js        # Original spinor operations; imports shared complex arithmetic
   main-v2.js             # Original spinor UI
 tests/
   complex.test.mjs       # Matrix/product equivalence, conjugation, polar, interpolation
+  matrix2.test.mjs       # Unit-circle images, eigenvectors, singular values, SVG mappings
 ```
 
 To add a demo:
@@ -71,3 +76,13 @@ Because the site is static, you can host the folder with GitHub Pages, Caddy, or
 - The equation library includes the actual two-component spinor operations, basis transformations, Pauli expectation, effective magnetic Hamiltonian and evolution (with `ħ=1`). The app's `B` parameter is not calibrated in teslas.
 
 Tests additionally verify screen/world coordinate roundtrips, mouse-anchored zoom, plot fitting, spinor field evolution, and browser-script syntax. The mathematical CI checks do not replace a manual browser visual review.
+
+## Mathematical choices in the matrix transformation demo
+
+The input can be any real matrix `M=[[a,b],[c,d]]`, or a complex multiplier `a+bi` translated through the existing shared `complexMatrix` function. Both input modes control the **same** final matrix display and visualization.
+
+The playhead uses the pedagogical path `M(t)=(1-t)I+tM`. Every frame transforms the *entire native SVG circle* via the full affine matrix `matrix(a c b d 0 0)`; the curve is not approximated by a finite polygon or by interpolating a few sample vectors. Singular maps explicitly render their mathematically correct line segment or point. The animation path is not unique: for instance, interpolating from `I` to `-I` passes through the zero matrix. The complex-multiplication demo continues to use polar interpolation instead.
+
+The original unit circle and transformed curve share the same world-to-screen coordinate system. The violet and teal axes are the images of the standard basis vectors, and the gold handle selects a column vector on the original circle. Real eigendirections, when available, are lines through the origin satisfying `Mv=λv` and are unaffected by the identity-to-`M` interpolation. The displayed singular values are **ellipse semiaxis lengths**, not necessarily eigenvalue magnitudes; they coincide with magnitudes of eigenvalues for symmetric matrices. Reflection can preserve the shape of the unit circle without corresponding to multiplication by a complex number.
+
+The new display components reuse the same 2×2 matrix renderer and 2×1 vector notation across demos. The project remains build-free; the matrix and complex circle demos have no browser-library dependency.
