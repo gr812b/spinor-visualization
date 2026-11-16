@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { worldToScreen, screenToWorld, zoomViewport, fitViewport, niceGridStep } from '../src/math/viewport.js';
+import { worldToScreen, screenToWorld, zoomViewport, fitViewport, niceGridStep, gridLinePositions } from '../src/math/viewport.js';
+import { complexMatrix, applyMatrix2, complex } from '../src/math/complex.js';
 
 function near(a,b,tol=1e-9) { assert.ok(Math.abs(a-b)<tol,a+' ≉ '+b); }
 
@@ -36,4 +37,36 @@ test('adaptive grid steps stay legible across different zoom levels',()=>{
     assert.ok(step>0&&Number.isFinite(step));
     assert.ok(px*step>30&&px*step<140,'grid step too dense/sparse '+px*step);
   }
+});
+
+test('original and transformed grids keep corresponding lattice lines during scale and rotation',()=>{
+  // Both grids must share source-space coordinates. Scaling is allowed to
+  // increase/decrease the *visible* density, not invent new subdivisions.
+  for(const pixels of [10,54,200]) {
+    const step=niceGridStep(pixels);
+    const source=gridLinePositions(step,8);
+    assert.equal(source.length,17);
+    for(const z of [complex(1,0),complex(2,1),complex(0,1),complex(.25,-.4),complex(-1,0)]) {
+      const matrix=complexMatrix(z);
+      const actual=source.map(x=>applyMatrix2(matrix,[x,0]));
+      const origin=applyMatrix2(matrix,[0,0]);
+      const basis=applyMatrix2(matrix,[step,0]);
+      actual.forEach((point,i)=>{
+        const latticeIndex=i-8;
+        near(point[0],origin[0]+latticeIndex*(basis[0]-origin[0]));
+        near(point[1],origin[1]+latticeIndex*(basis[1]-origin[1]));
+      });
+      for(let i=0;i<source.length-1;i++) {
+        const dx=actual[i+1][0]-actual[i][0];
+        const dy=actual[i+1][1]-actual[i][1];
+        near(Math.hypot(dx,dy),Math.hypot(basis[0],basis[1]));
+      }
+    }
+  }
+});
+test('line positions are centered on zero and independent of transform size',()=>{
+  const coordinates=gridLinePositions(0.5,4);
+  assert.deepEqual(coordinates,[-2,-1.5,-1,-.5,0,.5,1,1.5,2]);
+  assert.throws(()=>gridLinePositions(0,4),RangeError);
+  assert.throws(()=>gridLinePositions(1,-1),RangeError);
 });
