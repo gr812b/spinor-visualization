@@ -5,7 +5,7 @@ import { basisRotationMatrix } from '../src/operators-v2.js';
 import {
  PAULI, matDag, matApply, matMul, spinorNorm2, normalizeSpinor,
  expectation, defaultToZBasis, spinExpectationVectorFromDefaultBasis,
- magneticFieldHamiltonian, magneticEvolutionOperator, evolveInField, fieldDirection,
+ magneticFieldHamiltonian, magneticEvolutionOperator, evolveInField, fieldDirection, precessionGeometry,
 } from '../src/math/spinor.js';
 
 function near(a,b,tol=1e-10) {
@@ -89,5 +89,20 @@ test('renderer field-angle conversion preserves its existing axis convention',()
   for(const theta of [0,30,90,180])for(const phi of [0,40,220]){
     n=fieldDirection(theta,phi);
     near(Math.hypot(n.x,n.y,n.z),1);
+  }
+});
+
+test('precession circle projects perpendicular to field, retaining spin radius',()=>{
+  const spin={x:3,y:4,z:5},field={x:0,y:2,z:0};
+  const g=precessionGeometry(spin,field);
+  near(g.center.x,0);near(g.center.y,4);near(g.center.z,0);
+  near(g.perpendicular.x,3);near(g.perpendicular.y,0);near(g.perpendicular.z,5);
+  near(g.radius,Math.sqrt(34));
+  for(const n of [{x:1,y:2,z:3},{x:0,y:0,z:1}]) {
+    const p=precessionGeometry(spin,n);
+    near(p.center.x+p.perpendicular.x,spin.x);
+    near(p.center.y+p.perpendicular.y,spin.y);
+    near(p.center.z+p.perpendicular.z,spin.z);
+    near(p.radius,Math.hypot(p.perpendicular.x,p.perpendicular.y,p.perpendicular.z));
   }
 });
