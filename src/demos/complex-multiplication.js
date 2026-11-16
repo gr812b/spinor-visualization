@@ -107,10 +107,27 @@ function drawGrid(matrix,group,color,opacity,width) {
     line(group,applyMatrix2(matrix,[-span,v]),applyMatrix2(matrix,[span,v]),color,width,opacity);
   }
 }
-function formatMatrix(m) {
-  return '┌ '+fmt(m[0][0]).padStart(8)+'  '+fmt(m[0][1]).padStart(8)+' ┐\n'
-       + '└ '+fmt(m[1][0]).padStart(8)+'  '+fmt(m[1][1]).padStart(8)+' ┘';
+function drawMatrix(id,m) {
+  const target=$(id);
+  target.replaceChildren();
+  for(let row=0;row<2;row++) {
+    const left=document.createElement('span');
+    left.textContent=row===0?'⎡ ':'⎣ ';
+    target.append(left);
+    for(let col=0;col<2;col++) {
+      const part=document.createElement('span');
+      part.className=col===0?'matrix-first-column':'matrix-second-column';
+      part.textContent=fmt(m[row][col]).padStart(7);
+      target.append(part);
+      target.append(document.createTextNode(' '));
+    }
+    const right=document.createElement('span');
+    right.textContent=row===0?'⎤':'⎦';
+    target.append(right);
+    if(row===0)target.append(document.createTextNode('\n'));
+  }
 }
+
 function stop() {
   state.playing=false;state.lastTime=null;
   if(state.frame!==null) cancelAnimationFrame(state.frame);
@@ -128,6 +145,21 @@ function render() {
 
   reference.replaceChildren();moving.replaceChildren();vectors.replaceChildren();
   drawGrid([[1,0],[0,1]],reference,'#b4c4d9',.55,1.05);
+  const e=Math.max(50,(W+H+Math.abs(view.panX)+Math.abs(view.panY))/view.pixels);
+  line(reference,[-e,0],[e,0],'#69788d',1.5,.65);
+  line(reference,[0,-e],[0,e],'#69788d',1.5,.65);
+  const tickStep=niceStep(view.pixels);
+  const nTicks=Math.min(26,Math.ceil(e/tickStep));
+  for(let k=-nTicks;k<=nTicks;k++) {
+    if(k===0)continue;
+    const px=xy([k*tickStep,0]), py=xy([0,k*tickStep]);
+    if(px[0]>12 && px[0]<W-18 && px[1]>12 && px[1]<H-12){
+      svgNode(reference,'text',{x:px[0]+3,y:px[1]+13,fill:'#718096','font-size':10},fmt(k*tickStep));
+    }
+    if(py[0]>12 && py[0]<W-35 && py[1]>12 && py[1]<H-12){
+      svgNode(reference,'text',{x:py[0]+5,y:py[1]-4,fill:'#718096','font-size':10},fmt(k*tickStep));
+    }
+  }
   drawGrid(currentMatrix,moving,'#0d9488',.72,1.3);
   const currentOne=applyMatrix2(currentMatrix,[1,0]);
   const currentI=applyMatrix2(currentMatrix,[0,1]);
@@ -155,8 +187,8 @@ function render() {
     +'= '+fmtComplex(result);
   $('radius').textContent=fmt(cAbs(multiplier));
   $('angle').textContent=cAbs(multiplier)===0 ? 'undefined' : fmt(cArg(multiplier)*180/Math.PI)+'°';
-  $('target-matrix').textContent=formatMatrix(targetMatrix);
-  $('current-matrix').textContent=formatMatrix(currentMatrix);
+  drawMatrix('target-matrix',targetMatrix);
+  drawMatrix('current-matrix',currentMatrix);
   $('matrix-check').textContent='The violet arrow is the multiplier itself: T(1) = z. The teal arrow is T(i) = iz. These are the two columns of the current matrix.';
   const error=Math.hypot(matrixPoint[0]-output.re,matrixPoint[1]-output.im);
   if(error>1e-7) $('matrix-check').textContent+=' Numerical discrepancy: '+fmt(error);
