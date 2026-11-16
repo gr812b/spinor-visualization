@@ -1,43 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spinor Visualization Demo</title>
-  <link rel="stylesheet" href="style.css?v=16">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Math, seen · Interactive math reference</title>
+  <meta name="description" content="A small, visual and interactive library for understanding mathematics by seeing what each equation does.">
+  <link rel="stylesheet" href="site.css">
 </head>
-<body>
-  <header>
-    <h1>Spinor Visualization</h1>
-  </header>
-  <main>
-    <section id="controls">
-      <div class="control-row">
-        <button id="addBasis">Add Basis</button>
-        <button id="clear">Clear All</button>
-      </div>
-      <div id="basisList"></div>
-      <div class="control-row">
-        <label>Magnetic field magnitude: <input id="bMag" type="range" min="0" max="10" step="0.1" value="1"></label>
-        <label>
-          <span id="bThetaLabel">Field θ 90°</span>
-          <input id="bTheta" type="range" min="0" max="180" value="90">
-        </label>
-        <label>
-          <span id="bPhiLabel">Field φ 0°</span>
-          <input id="bPhi" type="range" min="0" max="360" value="0">
-        </label>
-        <button id="togglePlay">Play</button>
-      </div>
-    </section>
-
-    <section id="visuals">
-      <div id="clocks"></div>
-      <div id="three"></div>
+<body class="site-layout">
+  <aside class="app-sidebar" data-app-nav></aside>
+  <main class="site-content">
+    <header>
+      <div class="eyebrow">Interactive mathematics</div>
+      <h1>Understand it. See it. Come back to it.</h1>
+      <p class="intro">A personal library of mathematical ideas you can manipulate instead of memorizing. Each demo shows its equations, explains its assumptions, and links back to the shared implementation.</p>
+    </header>
+    <div class="demo-cards" id="demo-cards"></div>
+    <section class="panel" style="margin-top:18px;max-width:1100px">
+      <h2>How these demos fit together</h2>
+      <p>Pick a demo, change its numbers, watch the visual consequence, and open <strong>Equations used</strong> when you want to know where the operation comes from. The <a href="equations.html">equation library</a> collects those explanations in one place.</p>
+      <p class="note">Everything runs as static files. No build step or login required.</p>
     </section>
   </main>
-
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-  <script type="module" src="src/main-v2.js?v=19"></script>
+  <script type="module" src="src/ui/navigation.js"></script>
+  <script type="module">
+    import { DEMOS } from './src/math/equations.js';
+    const container = document.getElementById('demo-cards');
+    for(const demo of DEMOS) {
+      const card=document.createElement('a');
+      card.href=demo.href; card.className='panel demo-card';
+      const picture=document.createElement('div');
+      picture.className='card-graphic';
+      picture.innerHTML=demo.id === 'complex-multiplication'
+        ? '<svg viewBox="0 0 260 125" aria-hidden="true"><g stroke="#a8c7cb" stroke-width="1"><path d="M0 30H260M0 60H260M0 90H260M40 0V125M80 0V125M120 0V125M160 0V125M200 0V125M240 0V125"/></g><g transform="translate(100,70) rotate(-26) scale(1.3)" stroke="#0d9488" stroke-width="2" opacity=".9"><path d="M-120 -60H120M-120 -30H120M-120 0H120M-120 30H120M-120 60H120M-90 -70V70M-45 -70V70M0 -70V70M45 -70V70M90 -70V70"/></g><path d="M100 70L146 22" stroke="#c27817" stroke-width="4"/></svg>'
+        : '<svg viewBox="0 0 260 125" aria-hidden="true"><ellipse cx="130" cy="63" rx="65" ry="56" fill="#d8e6ff" stroke="#2563eb" stroke-opacity=".35"/><path d="M130 63L165 21" stroke="#d946a5" stroke-width="5"/><ellipse cx="130" cy="63" rx="65" ry="22" fill="none" stroke="#2563eb" stroke-opacity=".4"/><path d="M70 63H194M130 7V119" stroke="#2563eb" stroke-opacity=".4"/></svg>';
+      const cat=document.createElement('span');
+      cat.className='category';cat.textContent=demo.category;
+      const heading=document.createElement('h2');heading.textContent=demo.title;
+      const summary=document.createElement('p');summary.textContent=demo.summary;
+      const number=document.createElement('span');number.className='note';
+      number.textContent=demo.equationIds.length+' linked equations';
+      card.append(picture,cat,heading,summary,number);container.append(card);
+    }
+  </script>
 </body>
 </html>
