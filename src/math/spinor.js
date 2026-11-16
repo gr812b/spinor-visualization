@@ -71,6 +71,21 @@ export function magneticEvolutionOperator(magnitude,thetaDeg,phiDeg,dt) {
 export function evolveInField(state,magnitude,thetaDeg,phiDeg,dt) {
   return normalizeSpinor(matApply(magneticEvolutionOperator(magnitude,thetaDeg,phiDeg,dt),state));
 }
+// Split an expectation vector into components parallel and perpendicular
+// to a field axis. The perpendicular component traces the precession circle.
+export function precessionGeometry(spin,field) {
+  const norm=Math.hypot(field.x,field.y,field.z);
+  if(norm === 0) return {
+    center:{x:0,y:0,z:0},perpendicular:{...spin},radius:Math.hypot(spin.x,spin.y,spin.z),
+  };
+  const n={x:field.x/norm,y:field.y/norm,z:field.z/norm};
+  const projection=spin.x*n.x+spin.y*n.y+spin.z*n.z;
+  const center={x:n.x*projection,y:n.y*projection,z:n.z*projection};
+  const perpendicular={
+    x:spin.x-center.x,y:spin.y-center.y,z:spin.z-center.z,
+  };
+  return {center,perpendicular,radius:Math.hypot(perpendicular.x,perpendicular.y,perpendicular.z)};
+}
 export function fieldDirection(thetaDeg,phiDeg) {
   const th=thetaDeg*Math.PI/180, ph=phiDeg*Math.PI/180;
   // Match the existing renderer's lab-frame axis convention.
