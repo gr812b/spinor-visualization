@@ -1,7 +1,7 @@
-import { cConj } from './math/complex.js';
 import { Clock } from './clock.js?v=19';
 import { Basis3D } from './basis3d.js?v=19';
-import { complex, cMul, cAdd, basisRotationMatrix } from './operators-v2.js?v=16';
+import { complex, basisRotationMatrix } from './operators-v2.js?v=16';
+import { matDag, matApply, spinExpectationVectorFromDefaultBasis, normalizeSpinor as normalizeSpinorState, evolveInField } from './math/spinor.js';
 
 const clocksContainer = document.getElementById('clocks');
 const threeContainer = document.getElementById('three');
@@ -21,41 +21,6 @@ let playing = false;
 
 const basisListEl = document.getElementById('basisList');
 
-function matDag(U){
-  return [[cConj(U[0][0]), cConj(U[1][0])],[cConj(U[0][1]), cConj(U[1][1])]];
-}
-function matApply(U, v){
-  const a = cAdd(cMul(U[0][0], v[0]), cMul(U[0][1], v[1]));
-  const b = cAdd(cMul(U[1][0], v[0]), cMul(U[1][1], v[1]));
-  return [a,b];
-}
-
-function spinExpectationVectorFromDefaultBasis(state){
-  // Default basis is +/-y eigenbasis. Convert to z-basis, then compute Bloch expectation.
-  const invSqrt2 = 1 / Math.sqrt(2);
-  const a = state[0];
-  const b = state[1];
-
-  const alpha = {
-    re: (a.re + b.re) * invSqrt2,
-    im: (a.im + b.im) * invSqrt2,
-  };
-  const beta = {
-    re: (-a.im + b.im) * invSqrt2,
-    im: (a.re - b.re) * invSqrt2,
-  };
-
-  const alphaConjBeta = {
-    re: alpha.re * beta.re + alpha.im * beta.im,
-    im: alpha.re * beta.im - alpha.im * beta.re,
-  };
-
-  const sx = 2 * alphaConjBeta.re;
-  const sy = 2 * alphaConjBeta.im;
-  const sz = (alpha.re * alpha.re + alpha.im * alpha.im) - (beta.re * beta.re + beta.im * beta.im);
-  return { x: sx, y: sy, z: sz };
-}
-
 function syncExpectationVisualization(){
   const v = spinExpectationVectorFromDefaultBasis(spinor);
   basisView.setExpectationVector(v.x, v.y, v.z);
@@ -72,13 +37,6 @@ function updateClocks(){
   basisView.setBases(bases);
   syncFieldVisualization();
   syncExpectationVisualization();
-}
-
-function normalizeSpinor(){
-  const m0 = Math.hypot(spinor[0].re, spinor[0].im);
-  const m1 = Math.hypot(spinor[1].re, spinor[1].im);
-  const norm = Math.sqrt(m0*m0 + m1*m1) || 1;
-  spinor = [ { re: spinor[0].re / norm, im: spinor[0].im / norm }, { re: spinor[1].re / norm, im: spinor[1].im / norm } ];
 }
 
 function normalizeDegrees(deg){
@@ -210,7 +168,7 @@ function addBasis(theta=0, phi=0, name='Basis'){
       s1phaseLabel.textContent = `arg1 ${normalizeDegrees(Number(s1phase.value)).toFixed(0)}°`;
       spinor[0] = { re: m0*Math.cos(p0), im: m0*Math.sin(p0) };
       spinor[1] = { re: m1*Math.cos(p1), im: m1*Math.sin(p1) };
-      normalizeSpinor();
+      spinor = normalizeSpinorState(spinor);
       updateClocks();
       updatingSliders = false;
     }
@@ -262,15 +220,7 @@ function step(dt){
   const bMag = parseFloat(document.getElementById('bMag').value || 1);
   const thetaDeg = parseFloat(document.getElementById('bTheta').value || 90);
   const phiDeg = parseFloat(document.getElementById('bPhi').value || 0);
-  const fieldBasis = basisRotationMatrix(thetaDeg, phiDeg);
-  const fieldBasisDag = matDag(fieldBasis);
-  const coeffs = matApply(fieldBasisDag, spinor);
-  const halfPhase = (bMag * dt) / 2;
-  const plusPhase = { re: Math.cos(-halfPhase), im: Math.sin(-halfPhase) };
-  const minusPhase = { re: Math.cos(halfPhase), im: Math.sin(halfPhase) };
-  const evolvedCoeffs = [cMul(plusPhase, coeffs[0]), cMul(minusPhase, coeffs[1])];
-  spinor = matApply(fieldBasis, evolvedCoeffs);
-  normalizeSpinor();
+  spinor = evolveInField(spinor,bMag,thetaDeg,phiDeg,dt);
   updateClocks();
   const def = bases[0];
   if(def && def.spinControls){
