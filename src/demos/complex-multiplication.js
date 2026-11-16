@@ -4,6 +4,7 @@ import {
 import { parseScalar } from '../math/parse-scalar.js';
 import { worldToScreen, zoomViewport, fitViewport, niceGridStep, gridLinePositions } from '../math/viewport.js';
 import { DEMOS } from '../math/equations.js';
+import { renderMatrix2, formatReal as fmt } from '../ui/matrix-display.js';
 import { mountEquationLibrary } from '../ui/equation-library.js';
 
 const $ = id => document.getElementById(id);
@@ -20,14 +21,6 @@ const W = 760, H = 510, durationMs = 6500;
 const view = { pixels: 54, panX: 0, panY: 0 };
 const state = { progress: 0, playing: false, frame: null, lastTime: null, dragging: false, lastPointer: null };
 
-const clean = n => Math.abs(n) < 1e-10 ? 0 : n;
-function fmt(n) {
-  if (!Number.isFinite(n)) return 'undefined';
-  n = clean(n);
-  if (n === 0) return '0';
-  if (Math.abs(n) >= 100000 || Math.abs(n) < 0.0001) return n.toExponential(3);
-  return Number(n.toFixed(4)).toString();
-}
 function fmtComplex(z) {
   return fmt(z.re) + (z.im < 0 ? ' − ' : ' + ') + fmt(Math.abs(z.im)) + 'i';
 }
@@ -102,26 +95,6 @@ function drawGrid(matrix,group,color,opacity,width,step) {
     line(group,applyMatrix2(matrix,[-span,v]),applyMatrix2(matrix,[span,v]),color,width,opacity);
   }
 }
-function drawMatrix(id,m) {
-  const target=$(id);
-  target.replaceChildren();
-  for(let row=0;row<2;row++) {
-    const left=document.createElement('span');
-    left.textContent=row===0?'⎡ ':'⎣ ';
-    target.append(left);
-    for(let col=0;col<2;col++) {
-      const part=document.createElement('span');
-      part.className=col===0?'matrix-first-column':'matrix-second-column';
-      part.textContent=fmt(m[row][col]).padStart(7);
-      target.append(part);
-      target.append(document.createTextNode(' '));
-    }
-    const right=document.createElement('span');
-    right.textContent=row===0?'⎤':'⎦';
-    target.append(right);
-    if(row===0)target.append(document.createTextNode('\n'));
-  }
-}
 
 function stop() {
   state.playing=false;state.lastTime=null;
@@ -185,8 +158,8 @@ function render() {
     +'= '+fmtComplex(result);
   $('radius').textContent=fmt(cAbs(multiplier));
   $('angle').textContent=cAbs(multiplier)===0 ? 'undefined' : fmt(cArg(multiplier)*180/Math.PI)+'°';
-  drawMatrix('target-matrix',targetMatrix);
-  drawMatrix('current-matrix',currentMatrix);
+  renderMatrix2($('target-matrix'),targetMatrix);
+  renderMatrix2($('current-matrix'),currentMatrix);
   $('matrix-check').textContent='The violet arrow is the multiplier itself: T(1) = z. The teal arrow is T(i) = iz. These are the two columns of the current matrix.';
   const error=Math.hypot(matrixPoint[0]-output.re,matrixPoint[1]-output.im);
   if(error>1e-7) $('matrix-check').textContent+=' Numerical discrepancy: '+fmt(error);
