@@ -286,3 +286,12 @@ body.site-layout { grid-template-columns:205px minmax(0,1fr); }
   .matrix-live {font-size:11px;padding:7px 2px}
   .matrix2-values {gap:4px 6px}
 }
+
+.matrix-workbench .vector-equation {
+  display:flex; gap:7px; align-items:center; justify-content:flex-start;
+  flex-wrap:wrap;
+}
+.vector-equation .matrix2 {font-size:12px; padding:4px 8px}
+.vector2-values {display:grid; grid-template-columns:max-content; gap:1px}
+.vector2-values > span {text-align:right; min-width:4ch}
+.vector-arrow {color:var(--muted)}
