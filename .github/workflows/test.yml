@@ -13,6 +13,9 @@ jobs:
       - name: Check browser scripts for syntax errors
         run: |
           node --check src/demos/complex-multiplication.js
+          node --check src/demos/matrix-transformation.js
+          node --check src/math/matrix2.js
+          node --check src/ui/matrix-display.js
           node --check src/ui/equation-library.js
           node --check src/ui/navigation.js
           node --check src/main-v2.js
