@@ -1,3 +1,4 @@
+import { EQUATIONS } from '../src/math/equations.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -50,5 +51,14 @@ test('interpolation starts at identity and ends at exactly the target',()=>{
       close(a[0]*b[0]+a[1]*b[1],0);
       close(Math.hypot(...a),Math.hypot(...b));
     }
+  }
+});
+
+test('each displayed equation references actual shared implementations',()=>{
+  for(const [id,eq] of Object.entries(EQUATIONS)){
+    assert.ok(eq.expression && eq.why && eq.picture, id+' lacks an explanation');
+    assert.ok(eq.functions?.length > 0, id+' lacks linked implementations');
+    eq.functions.forEach(fn => assert.equal(typeof fn,'function'));
+    assert.equal(eq.source,'src/math/complex.js');
   }
 });
