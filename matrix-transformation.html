@@ -131,7 +131,10 @@
           <label class="field-label">Starting direction
             <input type="range" id="vector-angle" min="0" max="360" step="1" value="30">
           </label>
-          <p class="vector-readout" id="vector-readout"></p>
+          <div class="vector-readout vector-equation" id="vector-readout">
+            <span>v =</span><span id="vector-input"></span>
+            <span class="vector-arrow">→</span><span>M(t)v =</span><span id="vector-output"></span>
+          </div>
           <label class="eigen-toggle"><input type="checkbox" id="show-eigens" checked> Show target eigendirections</label>
           <p class="note" id="eigen-summary"></p>
           <p class="note" id="geometry-summary"></p>
