@@ -32,7 +32,8 @@ src/
   math/
     complex.js           # Single numeric source for complex operations
     parse-scalar.js      # Safe fraction and radical input parser
-    spinor.js            # Spinor normalization, matrices, field operator and evolution
+    viewport.js          # Reusable screen/world mapping and zoom/fit calculations
+    spinor.js            # Spinor normalization, matrices, field operator, evolution, precession
     equations.js         # Named equations, intuition, implementations, demo registry
   ui/
     navigation.js        # Sidebar across pages
@@ -68,3 +69,5 @@ Because the site is static, you can host the folder with GitHub Pages, Caddy, or
 - The plot supports wheel zoom around the cursor, drag-to-pan, zoom buttons, reset view and fit-to-points. The multiplier is the **image of 1** (violet arrow); the image of `i` shows the second matrix column (teal).
 - Presets include eighth-turn rotations (±45°). Inputs accept `1/2`, `-3/4`, `sqrt(2)/2`, `pi/4`, parentheses and arithmetic. The parser is deliberately restricted and never evaluates JavaScript.
 - The equation library includes the actual two-component spinor operations, basis transformations, Pauli expectation, effective magnetic Hamiltonian and evolution (with `ħ=1`). The app's `B` parameter is not calibrated in teslas.
+
+Tests additionally verify screen/world coordinate roundtrips, mouse-anchored zoom, plot fitting, spinor field evolution, and browser-script syntax. The mathematical CI checks do not replace a manual browser visual review.
